@@ -4,24 +4,24 @@ A demo website written in Go.
 
 ## Usage
 
-1. Build project with a tool of Go:
+1. Ensure <project_dir> in $GOPATH
+
+2. Entry to <project_basedir>
 
 ```bash
 cd <project_basedir>
-go build server
+```
+
+3. Change mode or script:
+
+```bash
+chmod +x deploy.sh
 ```
 
 2. Run it:
 
 ```bash
-chomd +rx ./server
-./server
-```
-
-Or, run it directly:
-
-```bash
-go run <project_basedir>/src/go-web-demo.go
+./deploy.sh
 ```
 
 ## License
