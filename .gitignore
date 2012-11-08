@@ -1,6 +1,7 @@
 .idea
 *.iml
-bin
-out
-pkg 
+bin**/*
+out**/*
+pkg**/*
 *.*log*
+server*
