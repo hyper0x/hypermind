@@ -7,6 +7,7 @@ import (
 	"io"
 	"strconv"
 	"fmt"
+	"bytes"
 )
 
 const (
@@ -30,15 +31,28 @@ func ReadConfig(fresh bool) (MyConfig, error) {
 	if !fresh && loaded {
 		return myConfig, nil
 	}
-	configFile, err := os.OpenFile(ConfigFilePath, os.O_RDONLY, 0666)
-	if err != nil {
-		return myConfig, err
-	}
-	defer configFile.Close()
-	configReader := bufio.NewReader(configFile)
 	myConfig = *new(MyConfig)
 	myConfig.ServerPort = DefaultServerPort
 	myConfig.Extras = make(map[string]string)
+	configFile, err := os.OpenFile(ConfigFilePath, os.O_RDONLY, 0666)
+	if err != nil {
+		switch err.(type) {
+		case *os.PathError:
+			var warningBuffer bytes.Buffer
+			warningBuffer.WriteString("Warning: the config file '")
+			warningBuffer.WriteString(ConfigFilePath)
+			warningBuffer.WriteString("' is NOT FOUND! ")
+			warningBuffer.WriteString("Use DEFAULT config '")
+			warningBuffer.WriteString(fmt.Sprintf("%v", myConfig))
+			warningBuffer.WriteString("'. ")
+			fmt.Println(warningBuffer.String())
+			return myConfig, nil
+		default:
+			return myConfig, err
+		}
+	}
+	defer configFile.Close()
+	configReader := bufio.NewReader(configFile)
 	for {
 		str, err := configReader.ReadString('\n')
 		if err != nil {
