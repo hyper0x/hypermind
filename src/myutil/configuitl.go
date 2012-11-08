@@ -17,6 +17,7 @@ const (
 
 type MyConfig struct {
     ServerPort int
+	WorkDir string
     Extras map[string]string
 }
 
@@ -33,6 +34,12 @@ func ReadConfig(fresh bool) (MyConfig, error) {
 	}
 	myConfig = *new(MyConfig)
 	myConfig.ServerPort = DefaultServerPort
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("GetwError:", err)
+	} else {
+		myConfig.WorkDir = currentDir
+	}
 	myConfig.Extras = make(map[string]string)
 	configFile, err := os.OpenFile(ConfigFilePath, os.O_RDONLY, 0666)
 	if err != nil {
@@ -46,6 +53,7 @@ func ReadConfig(fresh bool) (MyConfig, error) {
 			warningBuffer.WriteString(fmt.Sprintf("%v", myConfig))
 			warningBuffer.WriteString("'. ")
 			fmt.Println(warningBuffer.String())
+			loaded = true
 			return myConfig, nil
 		default:
 			return myConfig, err
@@ -79,6 +87,8 @@ func ReadConfig(fresh bool) (MyConfig, error) {
 			if err == nil {
 				myConfig.ServerPort = portNumber
 			}
+		case "current_dir":
+			myConfig.WorkDir = value
 		default:
 			myConfig.Extras[key] = value
 		}

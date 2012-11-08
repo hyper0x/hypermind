@@ -27,10 +27,13 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	loginName := attrMap["loginName"]
 	if len(loginName) > 0 {
 		attrMap["welcomePrefix"] = loginName + ", "
-	}  else {
+	} else {
 		attrMap["welcomePrefix"] = ""
 	}
-	t, _ := template.ParseFiles("welcome.gtpl")
+	t, err := template.ParseFiles(myutil.GetAbsolutePathOfPage("welcome.gtpl"))
+	if err != nil {
+		fmt.Println("TemplateParseErr:", err)
+	}
 	t.Execute(w, attrMap)
 }
 
@@ -53,7 +56,10 @@ func login(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("BasicAttrMapGenErr:", err)
 		}
 		attrMap["token"] = token
-		t, _ := template.ParseFiles("login.gtpl")
+		t, err := template.ParseFiles(myutil.GetAbsolutePathOfPage("login.gtpl"))
+		if err != nil {
+			fmt.Println("TemplateParseErr:", err)
+		}
 		t.Execute(w, attrMap)
 	} else {
 		r.ParseForm()
@@ -82,7 +88,10 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 		attrMap["loginName"] = loginName
 		attrMap["validToken"] = fmt.Sprintf("%v", validToken)
-		t, _ := template.ParseFiles("login-after.gtpl")
+		t, err := template.ParseFiles(myutil.GetAbsolutePathOfPage("login-after.gtpl"))
+		if err != nil {
+			fmt.Println("TemplateParseErr:", err)
+		}
 		t.Execute(w, attrMap)
 	}
 }
@@ -97,7 +106,10 @@ func register(w http.ResponseWriter, r *http.Request) {
 		invalidFields := myutil.VerifyRegisterForm(r)
 		if len(invalidFields) > 0 {
 			fmt.Println("There are a/some invalid field(s):", invalidFields)
-			t, _ := template.ParseFiles("register-after.gtpl")
+			t, err := template.ParseFiles("register-after.gtpl")
+			if err != nil {
+				fmt.Println("TemplateParseErr:", err)
+			}
 			t.Execute(w, nil)
 		}
 	}
