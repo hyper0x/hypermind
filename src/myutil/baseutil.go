@@ -8,7 +8,7 @@ import (
 	"io"
 	"crypto/md5"
 	"os"
-	"net"
+	"strings"
 )
 
 const (
@@ -38,15 +38,29 @@ func GetAbsolutePathOfPage(pageFileName string) (result string) {
 }
 
 func GenerateBasicAttrMap(r *http.Request) (attrMap map[string]string, err error) {
-	host, port, err := net.SplitHostPort(r.Host)
-	if err != nil {
-		return
-	}
 	attrMap = make(map[string]string)
+	host, port := splitHostPort(r.Host)
 	attrMap["serverAddr"] = host
-	attrMap["serverPort"] = fmt.Sprintf("%v", port)
+	attrMap["serverPort"] = port
 	loginName := GetCookie(r, LoginNameKey)
 	attrMap["loginName"] = loginName
+	return
+}
+
+func splitHostPort(requestHost string) (host string, port string) {
+	if splitIndex := strings.Index(requestHost, ":"); splitIndex > 0 {
+		host = requestHost[0:splitIndex]
+		port = requestHost[splitIndex + 1:len(requestHost)]
+	} else {
+		host = requestHost
+		config, err := ReadConfig(true)
+		if err != nil {
+			fmt.Println("ConfigLoadError: ", err)
+			port = "80"
+		} else {
+			port = fmt.Sprintf("%v", config.ServerPort)
+		}
+	}
 	return
 }
 
