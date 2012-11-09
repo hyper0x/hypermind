@@ -6,7 +6,7 @@ A demo website written in Go.
 
 1. Ensure the project path in $GOPATH
 
-2. get and install the library dependencies:
+2. Get and install the library dependencies:
 
 ```bash
 # session manager 
