@@ -4,9 +4,9 @@ A demo website written in Go.
 
 ## Usage
 
-1. Ensure the project path in $GOPATH
+1.  Ensure the project path in $GOPATH
 
-2. Get and install the library dependencies:
+2.  Get and install the library dependencies:
 
 ```bash
 # session manager 
@@ -14,7 +14,7 @@ go get github.com/astaxie/session
 go get github.com/astaxie/session/providers/memory
 ```
 
-3. Change mode of script & run:
+3.  Change mode of script & run:
 
 ```bash
 cd <project_path>
