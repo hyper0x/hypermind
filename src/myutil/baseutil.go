@@ -53,7 +53,7 @@ func splitHostPort(requestHost string) (host string, port string) {
 		port = requestHost[splitIndex + 1:len(requestHost)]
 	} else {
 		host = requestHost
-		config, err := ReadConfig(true)
+		config, err := ReadConfig(false)
 		if err != nil {
 			fmt.Println("ConfigLoadError: ", err)
 			port = "80"
