@@ -3,5 +3,5 @@
 bin**/*
 out**/*
 pkg**/*
-*.*log*
+logs**/*
 server*
