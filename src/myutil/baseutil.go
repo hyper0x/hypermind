@@ -26,17 +26,6 @@ func PrintRequestInfo(prefix string, r *http.Request) {
 	fmt.Println(prefix, "- scheme:", r.URL.Scheme)
 }
 
-func GetAbsolutePathOfPage(pageFileName string) (result string) {
-	config, err := ReadConfig(false)
-	if err != nil {
-		fmt.Println("ConfigLoadError: ", err)
-		result = pageFileName
-	} else {
-		result = config.WorkDir + "/web/page/" + pageFileName
-	}
-	return
-}
-
 func GenerateBasicAttrMap(r *http.Request) (attrMap map[string]string, err error) {
 	attrMap = make(map[string]string)
 	host, port := splitHostPort(r.Host)

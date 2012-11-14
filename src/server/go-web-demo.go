@@ -30,11 +30,14 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	} else {
 		attrMap["welcomePrefix"] = ""
 	}
-	t, err := template.ParseFiles(myutil.GetAbsolutePathOfPage("welcome.gtpl"))
+	t, err := template.ParseFiles("web/page/welcome.gtpl")
 	if err != nil {
 		fmt.Println("TemplateParseErr:", err)
 	}
-	t.Execute(w, attrMap)
+	err = t.Execute(w, attrMap)
+        if err != nil {
+                fmt.Println("PageWriteErr:", err)
+        }
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
@@ -56,11 +59,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("BasicAttrMapGenErr:", err)
 		}
 		attrMap["token"] = token
-		t, err := template.ParseFiles(myutil.GetAbsolutePathOfPage("login.gtpl"))
+		t, err := template.ParseFiles("web/page/login.gtpl")
 		if err != nil {
 			fmt.Println("TemplateParseErr:", err)
 		}
-		t.Execute(w, attrMap)
+		err = t.Execute(w, attrMap)
+                if err != nil {
+                        fmt.Println("PageWriteErr:", err)
+                }
 	} else {
 		r.ParseForm()
 		loginName = template.HTMLEscapeString(r.Form.Get(myutil.LoginNameKey))
@@ -88,11 +94,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 		attrMap["loginName"] = loginName
 		attrMap["validToken"] = fmt.Sprintf("%v", validToken)
-		t, err := template.ParseFiles(myutil.GetAbsolutePathOfPage("login-after.gtpl"))
+		t, err := template.ParseFiles("web/page/login-after.gtpl")
 		if err != nil {
 			fmt.Println("TemplateParseErr:", err)
 		}
-		t.Execute(w, attrMap)
+		err = t.Execute(w, attrMap)
+                if err != nil {
+                        fmt.Println("PageWriteErr:", err)
+                }
 	}
 }
 
@@ -100,17 +109,20 @@ func register(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	myutil.PrintRequestInfo("register", r)
 	if r.Method == "GET" {
-		t, _ := template.ParseFiles("register.gtpl")
+		t, _ := template.ParseFiles("web/page/register.gtpl")
 		t.Execute(w, nil)
 	} else {
 		invalidFields := myutil.VerifyRegisterForm(r)
 		if len(invalidFields) > 0 {
 			fmt.Println("There are a/some invalid field(s):", invalidFields)
-			t, err := template.ParseFiles("register-after.gtpl")
+			t, err := template.ParseFiles("web/page/register-after.gtpl")
 			if err != nil {
 				fmt.Println("TemplateParseErr:", err)
 			}
-			t.Execute(w, nil)
+			err = t.Execute(w, nil)
+                        if err != nil {
+                                fmt.Println("PageWriteErr:", err)
+                        }
 		}
 	}
 }
@@ -119,8 +131,11 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method)
 	if r.Method == "GET" {
 		token := r.Form.Get("token")
-		t, _ := template.ParseFiles("upload.gtpl")
-		t.Execute(w, token)
+		t, _ := template.ParseFiles("web/page/upload.gtpl")
+		err := t.Execute(w, token)
+                if err != nil {
+                        fmt.Println("PageWriteErr:", err)
+                }
 	} else {
 		r.ParseMultipartForm(32 << 20)
 		file, handler, err := r.FormFile("uploadfile")
@@ -148,7 +163,11 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", welcome)
+	fileServer := http.FileServer(http.Dir("web"))
+        http.Handle("/css/", fileServer)
+        http.Handle("/js/", fileServer)
+        http.Handle("/img/", fileServer)
+        http.HandleFunc("/", welcome)
 	http.HandleFunc("/register", register)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/upload", upload)
