@@ -20,59 +20,43 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("key:", k)
 		fmt.Println("val:", strings.Join(v, ""))
 	}
-	attrMap, err := myutil.GenerateBasicAttrMap(r)
-	if err != nil {
-		fmt.Println("BasicAttrMapGenErr:", err)
-	}
-	loginName := attrMap["loginName"]
-	if len(loginName) > 0 {
-		attrMap["welcomePrefix"] = loginName + ", "
-	} else {
-		attrMap["welcomePrefix"] = ""
-	}
+	userInfoMap := myutil.GetStagedUserInfo(w, r)
+	loginName := userInfoMap[myutil.LoginNameKey]
+	attrMap := myutil.GenerateBasicAttrMap(r, (len(loginName) > 0))
+	attrMap[myutil.LoginNameKey] = loginName
 	t, err := template.ParseFiles("web/page/welcome.gtpl")
 	if err != nil {
 		fmt.Println("TemplateParseErr:", err)
 	}
 	err = t.Execute(w, attrMap)
-        if err != nil {
-                fmt.Println("PageWriteErr:", err)
-        }
+    if err != nil {
+        fmt.Println("PageWriteErr:", err)
+    }
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	myutil.PrintRequestInfo("login", r)
-	session := myutil.GetSession(w, r)
-	var loginName string
-	if v := session.Get(myutil.LoginNameKey);v != nil {
-		loginName = v.(string)
-	}
+	userInfoMap := myutil.GetStagedUserInfo(w, r)
+	loginName := userInfoMap[myutil.LoginNameKey]
 	if r.Method == "GET" {
 		tokenKey := myutil.GenerateTokenKey(loginName, r)
 		fmt.Println("TokenKey:", tokenKey)
 		token := myutil.GenerateToken()
 		fmt.Println("Token:", token)
 		myutil.SetToken(tokenKey, token)
-		attrMap, err := myutil.GenerateBasicAttrMap(r)
-		if err != nil {
-			fmt.Println("BasicAttrMapGenErr:", err)
-		}
+		attrMap := myutil.GenerateBasicAttrMap(r, false)
 		attrMap["token"] = token
 		t, err := template.ParseFiles("web/page/login.gtpl")
 		if err != nil {
 			fmt.Println("TemplateParseErr:", err)
 		}
 		err = t.Execute(w, attrMap)
-                if err != nil {
-                        fmt.Println("PageWriteErr:", err)
-                }
+        if err != nil {
+            fmt.Println("PageWriteErr:", err)
+        }
 	} else {
 		r.ParseForm()
-		loginName = template.HTMLEscapeString(r.Form.Get(myutil.LoginNameKey))
-		fmt.Println("login - login_name:", loginName)
-		password := template.HTMLEscapeString(r.Form.Get(myutil.PasswordKey))
-		fmt.Println("login - password:", password)
 		token := r.Form.Get("token")
 		fmt.Println("Token:", token)
 		validToken := false
@@ -85,24 +69,43 @@ func login(w http.ResponseWriter, r *http.Request) {
 				validToken = true
 			}
 		}
-		if validToken {
-			myutil.SetCookie(w, myutil.LoginNameKey, loginName, 5)
+		loginName = template.HTMLEscapeString(r.Form.Get(myutil.LoginNameKey))
+		fmt.Println("login - loginName:", loginName)
+		password := template.HTMLEscapeString(r.Form.Get(myutil.PasswordKey))
+		fmt.Println("login - password:", password)
+		rememberMe := r.Form.Get("remember-me")
+		fmt.Println("login - remember-me:", rememberMe)
+		validLogin := myutil.VerifyUser(loginName, password)
+		rememberMeTag := r.Form.Get("remember-me")
+		if validLogin {
+			if validToken {
+				userInfoMap[myutil.LoginNameKey] = loginName
+				onlySession := len(rememberMeTag) == 0 || rememberMeTag != "y"
+				myutil.SetUserInfoToStage(userInfoMap, w, r, onlySession)
+			}
+		} else {
+		  //
 		}
-		attrMap, err := myutil.GenerateBasicAttrMap(r)
-		if err != nil {
-			fmt.Println("BasicAttrMapGenErr:", err)
-		}
-		attrMap["loginName"] = loginName
-		attrMap["validToken"] = fmt.Sprintf("%v", validToken)
-		t, err := template.ParseFiles("web/page/login-after.gtpl")
-		if err != nil {
-			fmt.Println("TemplateParseErr:", err)
-		}
-		err = t.Execute(w, attrMap)
-                if err != nil {
-                        fmt.Println("PageWriteErr:", err)
-                }
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	myutil.PrintRequestInfo("logout", r)
+	for k, v := range r.Form {
+		fmt.Println("key:", k)
+		fmt.Println("val:", strings.Join(v, ""))
+	}
+	userInfoMap := myutil.GetStagedUserInfo(w, r)
+	loginName := userInfoMap[myutil.LoginNameKey]
+	if len(loginName) > 0 {
+		myutil.RemoveUserInfoFromStage(userInfoMap, w, r)
+		fmt.Printf("Logout: The user '%s' has  logout.\n", loginName)
+	} else {
+		fmt.Printf("Logout: The user '%s' has yet login.\n", loginName)
+	}
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +113,10 @@ func register(w http.ResponseWriter, r *http.Request) {
 	myutil.PrintRequestInfo("register", r)
 	if r.Method == "GET" {
 		t, _ := template.ParseFiles("web/page/register.gtpl")
-		t.Execute(w, nil)
+		err := t.Execute(w, nil)
+		if err != nil {
+			fmt.Println("PageWriteErr:", err)
+		}
 	} else {
 		invalidFields := myutil.VerifyRegisterForm(r)
 		if len(invalidFields) > 0 {
@@ -120,9 +126,9 @@ func register(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("TemplateParseErr:", err)
 			}
 			err = t.Execute(w, nil)
-                        if err != nil {
-                                fmt.Println("PageWriteErr:", err)
-                        }
+            if err != nil {
+                fmt.Println("PageWriteErr:", err)
+            }
 		}
 	}
 }
@@ -133,9 +139,9 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		token := r.Form.Get("token")
 		t, _ := template.ParseFiles("web/page/upload.gtpl")
 		err := t.Execute(w, token)
-                if err != nil {
-                        fmt.Println("PageWriteErr:", err)
-                }
+        if err != nil {
+            fmt.Println("PageWriteErr:", err)
+        }
 	} else {
 		r.ParseMultipartForm(32 << 20)
 		file, handler, err := r.FormFile("uploadfile")
@@ -164,12 +170,13 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fileServer := http.FileServer(http.Dir("web"))
-        http.Handle("/css/", fileServer)
-        http.Handle("/js/", fileServer)
-        http.Handle("/img/", fileServer)
-        http.HandleFunc("/", welcome)
+    http.Handle("/css/", fileServer)
+    http.Handle("/js/", fileServer)
+    http.Handle("/img/", fileServer)
+    http.HandleFunc("/", welcome)
 	http.HandleFunc("/register", register)
 	http.HandleFunc("/login", login)
+	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/upload", upload)
 	config, err := myutil.ReadConfig(true)
 	if err != nil {

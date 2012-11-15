@@ -11,14 +11,6 @@ import (
 	"strings"
 )
 
-const (
-	LoginNameKey string = "login_name"
-	PasswordKey string = "password"
-	CnNameKey string = "cn_name"
-	EmailKey string = "email"
-	MobilePhoneKey string = "mobile_phone"
-)
-
 func PrintRequestInfo(prefix string, r *http.Request) {
 	fmt.Println(prefix, "- form:", r.Form)
 	fmt.Println(prefix, "- method:", r.Method)
@@ -26,14 +18,15 @@ func PrintRequestInfo(prefix string, r *http.Request) {
 	fmt.Println(prefix, "- scheme:", r.URL.Scheme)
 }
 
-func GenerateBasicAttrMap(r *http.Request) (attrMap map[string]string, err error) {
-	attrMap = make(map[string]string)
+func GenerateBasicAttrMap(r *http.Request, validLogin bool) map[string]string {
+	attrMap := make(map[string]string)
 	host, port := splitHostPort(r.Host)
 	attrMap["serverAddr"] = host
 	attrMap["serverPort"] = port
-	loginName := GetCookie(r, LoginNameKey)
-	attrMap["loginName"] = loginName
-	return
+	if validLogin {
+		attrMap["validLogin"] = "true"
+	}
+	return attrMap
 }
 
 func splitHostPort(requestHost string) (host string, port string) {

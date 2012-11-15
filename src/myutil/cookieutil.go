@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func SetCookie(w http.ResponseWriter,
+func SetOneCookie(w http.ResponseWriter,
                name string,
                value string,
                expirationMinute int) bool {
@@ -37,7 +37,7 @@ func GetCookies(r *http.Request) (data map[string]string) {
 	return
 }
 
-func GetCookie(r *http.Request, cookieName string) (value string) {
+func GetOneCookie(r *http.Request, cookieName string) (value string) {
 	if len(cookieName) == 0 {
 		return
 	}
@@ -47,5 +47,14 @@ func GetCookie(r *http.Request, cookieName string) (value string) {
 		}
 	}
 	return
+}
+
+func DeleteCookie(w http.ResponseWriter, cookieName string) bool {
+	if len(cookieName) == 0 {
+		return false
+	}
+	cookie := http.Cookie{Name: cookieName, MaxAge: -1}
+	http.SetCookie(w, &cookie)
+	return true
 }
 
