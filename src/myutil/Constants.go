@@ -14,3 +14,15 @@ const (
 	MobilePhoneKey string = "mobilePhone"
 )
 
+// page parameter
+const (
+	HomePageKey = "homePage"
+	HomePage = "home"
+	AboutMePageKey = "aboutMePage"
+	AboutMePage = "about-me"
+	AboutWebsitePageKey = "aboutWebsitePage"
+	AboutWebsitePage = "about-website"
+	MeetingKanbanPageKey = "meetingKanbanPage"
+	MeetingKanbanPage = "meeting-kanban"
+)
+

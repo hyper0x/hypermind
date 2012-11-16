@@ -24,7 +24,7 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	loginName := userInfoMap[myutil.LoginNameKey]
 	attrMap := myutil.GenerateBasicAttrMap(r, (len(loginName) > 0))
 	attrMap[myutil.LoginNameKey] = loginName
-	t, err := template.ParseFiles("web/page/welcome.gtpl")
+    t, err := template.ParseFiles(myutil.GeneratePagePath(r.FormValue("page")))
 	if err != nil {
 		fmt.Println("TemplateParseErr:", err)
 	}
@@ -47,7 +47,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		myutil.SetToken(tokenKey, token)
 		attrMap := myutil.GenerateBasicAttrMap(r, false)
 		attrMap["token"] = token
-		t, err := template.ParseFiles("web/page/login.gtpl")
+		t, err := template.ParseFiles(myutil.GeneratePagePath("login"))
 		if err != nil {
 			fmt.Println("TemplateParseErr:", err)
 		}
@@ -112,23 +112,28 @@ func register(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	myutil.PrintRequestInfo("register", r)
 	if r.Method == "GET" {
-		t, _ := template.ParseFiles("web/page/register.gtpl")
-		err := t.Execute(w, nil)
+		attrMap := myutil.GenerateBasicAttrMap(r, false)
+		encodedHint := r.FormValue("hint")
+		if len(encodedHint) > 0 {
+			hint := myutil.UrlDecoding(encodedHint)
+			attrMap["hint"] = hint
+		}
+		t, _ := template.ParseFiles(myutil.GeneratePagePath("register"))
+		err := t.Execute(w, attrMap)
 		if err != nil {
 			fmt.Println("PageWriteErr:", err)
 		}
 	} else {
-		invalidFields := myutil.VerifyRegisterForm(r)
+		fieldMap, invalidFields := myutil.VerifyRegisterForm(r)
+		fmt.Println("The field map:", fieldMap)
 		if len(invalidFields) > 0 {
-			fmt.Println("There are a/some invalid field(s):", invalidFields)
-			t, err := template.ParseFiles("web/page/register-after.gtpl")
-			if err != nil {
-				fmt.Println("TemplateParseErr:", err)
-			}
-			err = t.Execute(w, nil)
-            if err != nil {
-                fmt.Println("PageWriteErr:", err)
-            }
+			hint := fmt.Sprintln("There are some invalid fields of '':", invalidFields, ".")
+			fmt.Print(hint)
+			encodedHint := myutil.UrlEncoding(hint)
+			redirectUrl := "/register?hint=" + encodedHint
+			http.Redirect(w, r, redirectUrl, http.StatusFound)
+		} else {
+			http.Redirect(w, r, "/", http.StatusFound)
 		}
 	}
 }
@@ -137,7 +142,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method)
 	if r.Method == "GET" {
 		token := r.Form.Get("token")
-		t, _ := template.ParseFiles("web/page/upload.gtpl")
+		t, _ := template.ParseFiles(myutil.GeneratePagePath("upload"))
 		err := t.Execute(w, token)
         if err != nil {
             fmt.Println("PageWriteErr:", err)

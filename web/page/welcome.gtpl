@@ -29,7 +29,7 @@
   <body>
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container">
+        <div class="container-fluid">
           <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -41,7 +41,6 @@
               <li class="active"><a href="#">Home</a></li>
               <li><a href="#meeting-kanban">Meeting Kanban</a></li>
               <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
             </ul>
           </div>
          <ul class="nav pull-right">
@@ -59,37 +58,51 @@
       </div>
     </div>
 
-    <div class="container">
-      <div class="hero-unit">
-        <h1>Welcome to Hypermind!</h1>
-        <br>
-        <p>
-          This is a experimental website. It constructed by
-          <a class="btn btn-primary btn-small" href="http://golang.org">Golang</a>
-          &
-          <a class="btn btn-primary btn-small" href="http://twitter.github.com/bootstrap/">Bootstrap</a>
-          &
-          <a class="btn btn-primary btn-small" href="http://www.mongodb.org/">MongoDB</a>
-          .
-        </p>
-        <p>
-          My name is Harry Hao.
-          I live in Beijing.
-          I am in Sohu Inc (NSDQ: SOHU) as the position of Dev Leader.
-        </p>
-        <p>
-          I'm a broad interests software developer. I'm a open source fan, and pay attention to the agile methods and software process improvement.
-          I focus on Clojure and Go programming language, and contribute strength in order to the popularization of them in Chinese community.
-        </p>
-        <p>
-          BTW:
-          My homepage in GitHub is
-          <a class="btn btn-primary btn-small" href="https://github.com/hyper-carrot">hyper-carrot</a>
-          .
-          The Web site source code in here:
-          <a class="btn btn-primary btn-small" href="https://github.com/hyper-carrot/go-web-demo">go-web-demo</a>
-          .
-        </p>
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header">About</li>
+              <li class="active"><a href="#">About Me</a></li>
+              <li><a href="#">About Website</a></li>
+              <li><a href="#">Contact Info</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="span10">
+          <div class="hero-unit">
+            <h1>Welcome to Hypermind!</h1>
+            <br>
+            <p>
+              This is a experimental website. It constructed by
+              <a class="btn btn-primary btn-small" href="http://golang.org">Golang</a>
+              &
+              <a class="btn btn-primary btn-small" href="http://twitter.github.com/bootstrap/">Bootstrap</a>
+              &
+              <a class="btn btn-primary btn-small" href="http://www.mongodb.org/">MongoDB</a>
+              .
+            </p>
+            <p>
+              My name is Harry Hao.
+              I live in Beijing.
+              I am in Sohu Inc (NSDQ: SOHU) as the position of Dev Leader.
+            </p>
+            <p>
+              I'm a broad interests software developer. I'm a open source fan, and pay attention to the agile methods and software process improvement.
+              I focus on Clojure and Go programming language, and contribute strength in order to the popularization of them in Chinese community.
+            </p>
+            <p>
+              BTW:
+              My homepage in GitHub is
+              <a class="btn btn-small" href="https://github.com/hyper-carrot">hyper-carrot</a>
+              .
+              The Web site source code in here:
+              <a class="btn btn-small" href="https://github.com/hyper-carrot/go-web-demo">go-web-demo</a>
+              .
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 
