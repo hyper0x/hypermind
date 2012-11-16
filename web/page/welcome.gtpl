@@ -39,6 +39,7 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
+              <li><a href="#meeting-kanban">Meeting Kanban</a></li>
               <li><a href="#about">About</a></li>
               <li><a href="#contact">Contact</a></li>
             </ul>
@@ -63,10 +64,12 @@
         <h1>Welcome to Hypermind!</h1>
         <br>
         <p>
-          This is a demo website write by
-          <a class="btn btn-primary btn-small" href="http://golang.org">Goolge's Go programming language</a>
+          This is a experimental website. It constructed by
+          <a class="btn btn-primary btn-small" href="http://golang.org">Golang</a>
           &
-          <a class="btn btn-primary btn-small" href="http://twitter.github.com/bootstrap/">Twitter's Bootstrap</a>
+          <a class="btn btn-primary btn-small" href="http://twitter.github.com/bootstrap/">Bootstrap</a>
+          &
+          <a class="btn btn-primary btn-small" href="http://www.mongodb.org/">MongoDB</a>
           .
         </p>
         <p>
@@ -75,16 +78,16 @@
           I am in Sohu Inc (NSDQ: SOHU) as the position of Dev Leader.
         </p>
         <p>
-          I'm a broad interests software developer. I'm a open source fan, and pay attention to the agile methods and project management.
+          I'm a broad interests software developer. I'm a open source fan, and pay attention to the agile methods and software process improvement.
           I focus on Clojure and Go programming language, and contribute strength in order to the popularization of them in Chinese community.
         </p>
         <p>
           BTW:
-          My name in GitHub is
+          My homepage in GitHub is
           <a class="btn btn-primary btn-small" href="https://github.com/hyper-carrot">hyper-carrot</a>
           .
-          The Web site source:
-          <a class="btn btn-primary btn-small" href="https://github.com/hyper-carrot/clojure-web-demo">go-web-demo</a>
+          The Web site source code in here:
+          <a class="btn btn-primary btn-small" href="https://github.com/hyper-carrot/go-web-demo">go-web-demo</a>
           .
         </p>
       </div>
