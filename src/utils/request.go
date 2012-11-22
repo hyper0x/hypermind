@@ -1,17 +1,26 @@
-package myutil
+package utils
 
 import (
 	"net/http"
 	"time"
 	"regexp"
-	"fmt"
 	"io"
 	"crypto/md5"
 	"os"
+	"fmt"
 	"strings"
 	"encoding/base64"
 	"bytes"
+	"net/url"
+	"encoding/json"
 )
+
+type RequestInfo struct {
+	Form url.Values
+	Method string
+	Path string
+	Scheme string
+}
 
 var pageParameterMap map[string]string = map[string]string{
 	HomePageKey: HomePage,
@@ -28,11 +37,13 @@ func GeneratePagePath(reqPage string) string {
 	return "web/page/" + page + ".gtpl"
 }
 
-func PrintRequestInfo(prefix string, r *http.Request) {
-	fmt.Println(prefix, "- form:", r.Form)
-	fmt.Println(prefix, "- method:", r.Method)
-	fmt.Println(prefix, "- path:", r.URL.Path)
-	fmt.Println(prefix, "- scheme:", r.URL.Scheme)
+func GetRequestInfo(r *http.Request) string {
+	requestInfo := RequestInfo{Form: r.Form, Method: r.Method, Path: r.URL.Path, Scheme: r.URL.Scheme}
+	b, err := json.Marshal(requestInfo)
+	if err != nil {
+		LogErrorln("JsonMarshalError:", err)
+	}
+	return string(b)
 }
 
 func GenerateBasicAttrMap(r *http.Request, validLogin bool) map[string]string {
@@ -57,7 +68,7 @@ func splitHostPort(requestHost string) (host string, port string) {
 		host = requestHost
 		config, err := ReadConfig(false)
 		if err != nil {
-			fmt.Println("ConfigLoadError: ", err)
+			LogErrorln("ConfigLoadError: ", err)
 			port = "80"
 		} else {
 			port = fmt.Sprintf("%v", config.ServerPort)
@@ -101,9 +112,9 @@ func DeleteTempFile(delay time.Duration, filePath string) (err error) {
 	time.Sleep(delay)
 	err = os.Remove(filePath)
 	if err != nil {
-		fmt.Printf("Occur error when delete file '%s': %s\n", filePath, err)
+		LogErrorf("Occur error when delete file '%s': %s\n", filePath, err)
 	} else {
-		fmt.Printf("The file '%s' is deleted.\n", filePath, err)
+		LogInfof("The file '%s' is deleted.\n", filePath, err)
 	}
 	return
 }

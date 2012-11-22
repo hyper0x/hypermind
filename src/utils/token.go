@@ -1,4 +1,4 @@
-package myutil
+package utils
 
 import (
 	"net/http"

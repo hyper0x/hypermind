@@ -1,4 +1,4 @@
-package myutil
+package utils
 
 import (
 	"os"
@@ -27,7 +27,7 @@ var loaded bool = false
 
 func ReadConfig(fresh bool) (MyConfig, error) {
 	defer func() {
-		fmt.Printf("Loaded config: %s\n", myConfig)
+		LogInfof("Loaded config: %v\n", myConfig)
 	}()
 	if !fresh && loaded {
 		return myConfig, nil
@@ -36,7 +36,7 @@ func ReadConfig(fresh bool) (MyConfig, error) {
 	myConfig.ServerPort = DefaultServerPort
 	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Println("GetwError:", err)
+		LogErrorln("GetwdError:", err)
 	} else {
 		myConfig.WorkDir = currentDir
 	}
@@ -52,7 +52,7 @@ func ReadConfig(fresh bool) (MyConfig, error) {
 			warningBuffer.WriteString("Use DEFAULT config '")
 			warningBuffer.WriteString(fmt.Sprintf("%v", myConfig))
 			warningBuffer.WriteString("'. ")
-			fmt.Println(warningBuffer.String())
+			LogWarnln(warningBuffer.String())
 			loaded = true
 			return myConfig, nil
 		default:

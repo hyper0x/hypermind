@@ -1,4 +1,4 @@
-package myutil
+package utils
 
 // stage constants
 const (

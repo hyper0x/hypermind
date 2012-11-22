@@ -1,7 +1,6 @@
-package myutil
+package utils
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -9,7 +8,7 @@ func GetStagedUserInfo(w http.ResponseWriter, r *http.Request) map[string]string
 	userInfoMap := make(map[string]string)
 	loginName := GetOneCookie(r, LoginNameKey)
 	if len(loginName) == 0 {
-		fmt.Println("The login name is NOT in the cookie of client!")
+		LogErrorln("The login name is NOT in the cookie of client!")
 		session := GetSession(w, r)
 		if v := session.Get(LoginNameKey);v != nil {
 			loginName = v.(string)
