@@ -23,10 +23,10 @@ type RequestInfo struct {
 }
 
 var pageParameterMap map[string]string = map[string]string{
-	HomePageKey: HomePage,
-	AboutMePageKey: AboutMePage,
-	AboutWebsitePageKey:  AboutWebsitePage,
-	MeetingKanbanPageKey: MeetingKanbanPage,
+	HOME_PAGE_KEY: HOME_PAGE,
+	ABOUT_ME_PAGE_KEY: ABOUT_ME_PAGE,
+	ABOUT_WEBSITE_PAGE_KEY:  ABOUT_WEBSITE_PAGE,
+	MEETING_KANBAN_PAGE_KEY: MEETING_KANBAN_PAGE,
 }
 
 func GeneratePagePath(reqPage string) string {
@@ -80,30 +80,32 @@ func splitHostPort(requestHost string) (host string, port string) {
 func VerifyRegisterForm(r *http.Request) (fieldMap map[string]string, invalidFields []string) {
 	fieldMap = make(map[string]string)
 	invalidFields = make([]string, 1)
-	loginName := r.FormValue(LoginNameKey)
-	fieldMap[LoginNameKey] = loginName
+	loginName := r.FormValue(LOGIN_NAME_KEY)
+	fieldMap[LOGIN_NAME_KEY] = loginName
 	if m, _ := regexp.MatchString("^[a-zA-Z-_\\.]{1, 10}$", loginName); !m {
-		invalidFields = append(invalidFields, LoginNameKey)
+		invalidFields = append(invalidFields, LOGIN_NAME_KEY)
 	}
-	password := r.FormValue(PasswordKey)
-	fieldMap[PasswordKey] = password
+	password := r.FormValue(PASSWORD_KEY)
+	fieldMap[PASSWORD_KEY] = password
 	if m, _ := regexp.MatchString("^[a-zA-Z-_\\.]{1, 20}$", password); !m {
-		invalidFields = append(invalidFields, PasswordKey)
+		invalidFields = append(invalidFields, PASSWORD_KEY)
 	}
-	cnName := r.FormValue(CnNameKey)
-	fieldMap[CnNameKey] = cnName
-	if m, _ := regexp.MatchString("^[\\x{4e00}-\\x{9fa5}]+$", cnName); !m {
-		invalidFields = append(invalidFields, CnNameKey)
+	cnName := r.FormValue(CN_NAME_KEY)
+	fieldMap[CN_NAME_KEY] = cnName
+	if len(cnName) > 0 {
+		if m, _ := regexp.MatchString("^[\\x{4e00}-\\x{9fa5}]+$", cnName); !m {
+			invalidFields = append(invalidFields, CN_NAME_KEY)
+		}
 	}
-	email := r.FormValue(EmailKey)
-	fieldMap[EmailKey] = email
+	email := r.FormValue(EMAIL_KEY)
+	fieldMap[EMAIL_KEY] = email
 	if m, _ := regexp.MatchString(`^([\w\.\_]{2,10})@(\w{1,}).([a-z]{2,4})$`, email); !m {
-		invalidFields = append(invalidFields, EmailKey)
+		invalidFields = append(invalidFields, EMAIL_KEY)
 	}
-	mobilePhone := r.FormValue(MobilePhoneKey)
-	fieldMap[MobilePhoneKey] = mobilePhone
+	mobilePhone := r.FormValue(MOBILE_PHONE_KEY)
+	fieldMap[MOBILE_PHONE_KEY] = mobilePhone
 	if m, _ := regexp.MatchString(`^(1[3|4|5|8][0-9]\d{4,8})$`, mobilePhone); !m {
-		invalidFields = append(invalidFields, MobilePhoneKey)
+		invalidFields = append(invalidFields, MOBILE_PHONE_KEY)
 	}
 	return
 }
