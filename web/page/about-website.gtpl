@@ -38,9 +38,23 @@
                     .
                 </p>
                 <p>
-                    The Web site source code in here:
-                    <a class="btn btn-small" href="https://github.com/hyper-carrot/go-web-demo">go-web-demo</a>
+                    The Web site source code in <a href="https://github.com/hyper-carrot/go-web-demo">here</a>
                     .
+                </p>
+                <p>
+                <br>
+                <h4>The scheduled functions:</h4>
+                <ul>
+                    <li>Publish meeting</li>
+                    <li>Manage own meeting</li>
+                    <li>Meeting list show</li>
+                    <li>Meeting detail show</li>
+                    <li>Register for meeting</li>
+                    <li>* Registration confirmation & Reminding</li>
+                    <li>* Meeting tag & aggregation & recommendation</li>
+                    <li>* Meeting static/vertical analysis</li>
+                </ul>
+                <b>* Vision and long-term goals</b>
                 </p>
             </div>
         </div>
