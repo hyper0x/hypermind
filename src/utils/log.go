@@ -30,61 +30,126 @@ func getInvokerLocation() string {
 }
 
 func LogError(v ...interface{}) {
-	log.Printf("[ERROR] %s - %v", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[ERROR]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Print(params...)
 }
 
 func LogErrorf(format string, v ...interface{}) {
-	log.Printf("[ERROR] %s - " + format, getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, getInvokerLocation())
+	params = append(params, v...)
+	log.Printf(("[ERROR] %s - " + format), params...)
 }
 
 func LogErrorln(v ...interface{}) {
-	log.Printf("[ERROR] %s - %v\n", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[ERROR]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Println(params...)
 }
 
 func LogFatal(v ...interface{}) {
-	log.Fatalf("[FATAL] %s - %v", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[FATAL]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Fatal(params...)
 }
 
 func LogFatalf(format string, v ...interface{}) {
-	log.Fatalf("[FATAL] %s - " + format, getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, getInvokerLocation())
+	params = append(params, v...)
+	log.Fatalf("[FATAL] %s - " + format, params...)
 }
 
 func LogFatalln(v ...interface{}) {
-	log.Fatalf("[FATAL] %s - %v\n", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[FATAL]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Fatalln(params...)
 }
 
 func LogInfo(v ...interface{}) {
-	log.Printf("[INFO] %s - %v", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[INFO]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Print(params...)
 }
 
 func LogInfof(format string, v ...interface{}) {
-	log.Printf("[INFO] %s - " + format, getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, getInvokerLocation())
+	params = append(params, v...)
+	log.Printf("[INFO] %s - " + format, params...)
 }
 
 func LogInfoln(v ...interface{}) {
-	log.Printf("[INFO] %s - %v\n", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[INFO]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Println(params...)
 }
 
 func LogPanic(v ...interface{}) {
-	log.Panicf("[PANIC] %s - %v", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[PANIC]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Panic(params...)
 }
 
 func LogPanicf(format string, v ...interface{}) {
-	log.Panicf("[PANIC] %s - " + format, getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, getInvokerLocation())
+	params = append(params, v...)
+	log.Panicf("[PANIC] %s - " + format, params...)
 }
 
 func LogPanicln(v ...interface{}) {
-	log.Panicf("[PANIC] %s - %v\n", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[PANIC]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Panicln(params...)
 }
 
 func LogWarn(v ...interface{}) {
-	log.Printf("[WARN] %s - %v", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[WARN]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Print(params...)
 }
 
 func LogWarnf(format string, v ...interface{}) {
-	log.Printf("[WARN] %s - " + format, getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, getInvokerLocation())
+	params = append(params, v...)
+	log.Printf("[WARN] %s - " + format, params...)
 }
 
 func LogWarnln(v ...interface{}) {
-	log.Printf("[WARN] %s - %v\n", getInvokerLocation(), v)
+	var params []interface {}
+	params = append(params, "[WARN]")
+	params = append(params, getInvokerLocation())
+	params = append(params, "-")
+	params = append(params, v...)
+	log.Println(params...)
 }
