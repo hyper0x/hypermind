@@ -15,16 +15,27 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	utils.LogInfoln(utils.GetRequestInfo(r))
 	userInfoMap := utils.GetStagedUserInfo(w, r)
-	loginName := userInfoMap[utils.LoginNameKey]
+	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
 	attrMap := utils.GenerateBasicAttrMap(r, (len(loginName) > 0))
-	attrMap[utils.LoginNameKey] = loginName
-    t, err := template.ParseFiles(utils.GeneratePagePath(r.FormValue("page")))
-	if err != nil {
-		utils.LogErrorln("TemplateParseErr:", err)
+	attrMap[utils.LOGIN_NAME_KEY] = loginName
+	currentPage := r.FormValue("page")
+	if len(currentPage) == 0 {
+		currentPage = utils.HOME_PAGE
 	}
-	err = t.Execute(w, attrMap)
+	t := template.New("welcome page")
+	t.Funcs(template.FuncMap{"equal": utils.SimpleEqual})
+    t, err := t.ParseFiles(utils.GeneratePagePath(currentPage),
+	    utils.GeneratePagePath("header"),
+		utils.GeneratePagePath("footer"),
+	    utils.GeneratePagePath("navbar"))
+	if err != nil {
+		utils.LogErrorln("ParseFilesErr:", err)
+	}
+	attrMap["currentPage"] = currentPage
+	t.Funcs(template.FuncMap{"equal": utils.SimpleEqual})
+	err = t.ExecuteTemplate(w, "page", attrMap)
     if err != nil {
-		utils.LogErrorln("PageWriteErr:", err)
+		utils.LogErrorln("ExecuteTemplateErr:", err)
     }
 }
 
@@ -32,7 +43,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	utils.LogInfoln(utils.GetRequestInfo(r))
 	userInfoMap := utils.GetStagedUserInfo(w, r)
-	loginName := userInfoMap[utils.LoginNameKey]
+	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
 	if r.Method == "GET" {
 		tokenKey := utils.GenerateTokenKey(loginName, r)
 		utils.LogInfoln("TokenKey:", tokenKey)
@@ -63,22 +74,25 @@ func login(w http.ResponseWriter, r *http.Request) {
 				validToken = true
 			}
 		}
-		loginName = template.HTMLEscapeString(r.Form.Get(utils.LoginNameKey))
+		loginName = template.HTMLEscapeString(r.Form.Get(utils.LOGIN_NAME_KEY))
 		utils.LogInfoln("login - loginName:", loginName)
-		password := template.HTMLEscapeString(r.Form.Get(utils.PasswordKey))
+		password := template.HTMLEscapeString(r.Form.Get(utils.PASSWORD_KEY))
 		utils.LogInfoln("login - password:", password)
 		rememberMe := r.Form.Get("remember-me")
 		utils.LogInfoln("login - remember-me:", rememberMe)
-		validLogin := utils.VerifyUser(loginName, password)
-		rememberMeTag := r.Form.Get("remember-me")
-		if validLogin {
-			if validToken {
-				userInfoMap[utils.LoginNameKey] = loginName
-				onlySession := len(rememberMeTag) == 0 || rememberMeTag != "y"
-				utils.SetUserInfoToStage(userInfoMap, w, r, onlySession)
-			}
+		validLogin, err := utils.VerifyUser(loginName, password)
+		utils.LogInfoln("Verify user:", validLogin)
+		if err != nil {
+			utils.LogErrorf("VerifyUserError (loginName=%s): %s\n", loginName, err)
 		} else {
-		  //
+			rememberMeTag := r.Form.Get("remember-me")
+			if validLogin {
+				if validToken {
+					userInfoMap[utils.LOGIN_NAME_KEY] = loginName
+					onlySession := len(rememberMeTag) == 0 || rememberMeTag != "y"
+					utils.SetUserInfoToStage(userInfoMap, w, r, onlySession)
+				}
+			}
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
@@ -88,7 +102,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	utils.LogInfoln(utils.GetRequestInfo(r))
 	userInfoMap := utils.GetStagedUserInfo(w, r)
-	loginName := userInfoMap[utils.LoginNameKey]
+	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
 	if len(loginName) > 0 {
 		utils.RemoveUserInfoFromStage(userInfoMap, w, r)
 		utils.LogInfoln("Logout: The user '%s' has  logout.\n", loginName)

@@ -1,9 +1,25 @@
-/**
- * Created with IntelliJ IDEA.
- * User: linhao
- * Date: 12-11-29
- * Time: 上午11:42
- * To change this template use File | Settings | File Templates.
- */
-package template
+package utils
 
+import (
+	"fmt"
+)
+
+func SimpleEqual(args ...interface{}) bool {
+	if len(args) == 0 {
+		return false
+	}
+	prevValue := ""
+	currentValue := ""
+	start := false
+	result := true
+	for _, v := range args {
+		currentValue = fmt.Sprintf("%v", v)
+		if start && currentValue != prevValue {
+			result = false
+			break
+		}
+		prevValue = currentValue
+		start = true
+	}
+	return result
+}
