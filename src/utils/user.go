@@ -29,7 +29,7 @@ func init() {
 	rootPrivileges = append(rootPrivileges, Privilege{Name: "user-kanban", Tag: 1})
 	user, err := GetUserFromDb(ROOT_USER_NAME)
 	if err != nil {
-		LogErrorf("RootUserCheckError:%s\n", err)
+		LogErrorf("RootUserCheckError: %s\n", err)
 	} else {
 		if user == nil {
 			LogInfo("Initialize root user...")
@@ -42,9 +42,9 @@ func init() {
 				Remark: "root user"}
 			err = SetUserToDb(root)
 			if err != nil {
-				LogErrorf("RootUserInitError:%s\n", err)
+				LogErrorf("RootUserInitError: %s\n", err)
 			} else {
-				LogInfo("done\n")
+				LogInfo("Root user initialization is done\n")
 			}
 		}
 	}

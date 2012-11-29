@@ -76,6 +76,9 @@ func GetUserFromDb(loginName string) (*User, error) {
 	if !exists(REDIS_USER_KEY) {
 		return nil, nil
 	}
+	if !hashFieldExists(REDIS_USER_KEY, loginName) {
+		return nil, nil
+	}
 	conn := redisPool.Get()
 	defer conn.Close()
 	literals, err := redis.String(conn.Do("HGET", REDIS_USER_KEY, loginName))
@@ -142,11 +145,28 @@ func DeleteUserFromDb(loginName string) (error) {
 func exists(key string) bool {
 	conn := redisPool.Get()
 	defer conn.Close()
-	exists, err := redis.Bool(conn.Do("EXISTS", REDIS_USER_KEY))
+	exists, err := redis.Bool(conn.Do("EXISTS", key))
 	if err != nil {
 		LogErrorf("JudgeKeyExistenceError (key=%s): %s\n ", key, err)
 		return false
 	}
+	if !exists {
+		LogWarnf("The key '%s' is NONEXISTENCE.\n", key)
+	}
 	return exists
+}
+
+func hashFieldExists(key string, field string) bool {
+	conn := redisPool.Get()
+	fieldExists, err := redis.Bool(conn.Do("HEXISTS", REDIS_USER_KEY, field))
+	if err != nil {
+		LogErrorf("JudgeHashFieldExistenceError (key=%s, field=%s): %s\n ", key, field, err)
+		return false
+	}
+	if !fieldExists {
+		LogWarnf("The field '%s' in hash key '%s' is NONEXISTENCE.\n", field, key)
+		return false
+	}
+	return fieldExists
 }
 
