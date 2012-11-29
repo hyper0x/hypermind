@@ -29,7 +29,7 @@ func init() {
 	rootPrivileges = append(rootPrivileges, Privilege{Name: "user-kanban", Tag: 1})
 	user, err := GetUserFromDb(ROOT_USER_NAME)
 	if err != nil {
-		LogErrorf("RootInitializationError:%s\n", err)
+		LogErrorf("RootUserCheckError:%s\n", err)
 	} else {
 		if user == nil {
 			LogInfo("Initialize root user...")
@@ -42,7 +42,7 @@ func init() {
 				Remark: "root user"}
 			err = SetUserToDb(root)
 			if err != nil {
-				LogErrorf("RootInitError:%s\n", err)
+				LogErrorf("RootUserInitError:%s\n", err)
 			} else {
 				LogInfo("done\n")
 			}
@@ -73,7 +73,7 @@ func SetUserInfoToStage(
 		return false
 	}
 	if !onlySession {
-		SetCookies(w, userInfoMap, CookieLifecycleMinutes)
+		SetCookies(w, userInfoMap, COOKIE_LIFE_CYCLE_MINUTES)
 	}
 	session := GetSession(w, r)
 	for key, value := range userInfoMap {
@@ -86,7 +86,7 @@ func RemoveUserInfoFromStage(userInfoMap map[string]string, w http.ResponseWrite
 	if len(userInfoMap) == 0 {
 		return false
 	}
-	SetCookies(w, userInfoMap, CookieLifecycleMinutes)
+	SetCookies(w, userInfoMap, COOKIE_LIFE_CYCLE_MINUTES)
 	session := GetSession(w, r)
 	for key, _ := range userInfoMap {
 		session.Delete(key)
