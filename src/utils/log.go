@@ -31,9 +31,9 @@ func getInvokerLocation() string {
 
 func LogError(v ...interface{}) {
 	var params []interface {}
-	params = append(params, "[ERROR]")
+	params = append(params, "[ERROR] ")
 	params = append(params, getInvokerLocation())
-	params = append(params, "-")
+	params = append(params, " - ")
 	params = append(params, v...)
 	log.Print(params...)
 }
@@ -56,9 +56,9 @@ func LogErrorln(v ...interface{}) {
 
 func LogFatal(v ...interface{}) {
 	var params []interface {}
-	params = append(params, "[FATAL]")
+	params = append(params, "[FATAL] ")
 	params = append(params, getInvokerLocation())
-	params = append(params, "-")
+	params = append(params, " - ")
 	params = append(params, v...)
 	log.Fatal(params...)
 }
@@ -81,9 +81,9 @@ func LogFatalln(v ...interface{}) {
 
 func LogInfo(v ...interface{}) {
 	var params []interface {}
-	params = append(params, "[INFO]")
+	params = append(params, "[INFO] ")
 	params = append(params, getInvokerLocation())
-	params = append(params, "-")
+	params = append(params, " - ")
 	params = append(params, v...)
 	log.Print(params...)
 }
@@ -106,9 +106,9 @@ func LogInfoln(v ...interface{}) {
 
 func LogPanic(v ...interface{}) {
 	var params []interface {}
-	params = append(params, "[PANIC]")
+	params = append(params, "[PANIC] ")
 	params = append(params, getInvokerLocation())
-	params = append(params, "-")
+	params = append(params, " - ")
 	params = append(params, v...)
 	log.Panic(params...)
 }
@@ -131,9 +131,9 @@ func LogPanicln(v ...interface{}) {
 
 func LogWarn(v ...interface{}) {
 	var params []interface {}
-	params = append(params, "[WARN]")
+	params = append(params, "[WARN] ")
 	params = append(params, getInvokerLocation())
-	params = append(params, "-")
+	params = append(params, " - ")
 	params = append(params, v...)
 	log.Print(params...)
 }
