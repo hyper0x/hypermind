@@ -12,7 +12,7 @@
                 <ul class="nav">
                     <li {{if equal .currentPage .homePage}}class="active"{{end}}><a href="/?page={{.homePage}}">Home</a></li>
                     <li {{if equal .currentPage .meetingKanbanPage}}class="active"{{end}}><a href="/?page={{.meetingKanbanPage}}">Meeting Kanban</a></li>
-                    <li {{if equal .currentPage .aboutMePage}}class="active"{{end}}><a href="/?page={{.aboutMePage}}">About</a></li>
+                    <li {{if match .currentPage "^about-.*"}}class="active"{{end}}><a href="/?page={{.aboutMePage}}">About</a></li>
                 </ul>
             </div>
             <ul class="nav pull-right">

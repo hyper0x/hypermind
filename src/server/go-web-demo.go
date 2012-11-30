@@ -23,7 +23,10 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 		currentPage = utils.HOME_PAGE
 	}
 	t := template.New("welcome page")
-	t.Funcs(template.FuncMap{"equal": utils.SimpleEqual})
+	t.Funcs(template.FuncMap{
+		"equal": utils.SimpleEqual,
+		"match": utils.MatchString,
+	})
     t, err := t.ParseFiles(utils.GeneratePagePath(currentPage),
 	    utils.GeneratePagePath("header"),
 		utils.GeneratePagePath("footer"),
@@ -32,7 +35,6 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 		utils.LogErrorln("ParseFilesErr:", err)
 	}
 	attrMap["currentPage"] = currentPage
-	t.Funcs(template.FuncMap{"equal": utils.SimpleEqual})
 	err = t.ExecuteTemplate(w, "page", attrMap)
     if err != nil {
 		utils.LogErrorln("ExecuteTemplateErr:", err)
