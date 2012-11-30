@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Mainpage - Hypermind</title>
+    <title>Meeting Kanban - Hypermind</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="The homepage of Hypermind.">
     <meta name="author" content="hyper-carrot">
