@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PID=`ps -ef | grep "hypermind" | grep "server" | grep -v grep | awk '{print $2}'`
+PID=`ps -ef | grep "hypermind" | grep "server.go" | grep -v grep | awk '{print $2}'`
 if [ -z $PID ]; then
 	echo "The server has yet to launch."
 else
@@ -13,5 +13,5 @@ if [ ! -d "$LOG_DIR" ]; then
 	echo "Creating dir '$LOG_DIR' ..."
 	mkdir "$LOG_DIR"
 fi
-go run server.go 2>&1 | cronolog "$LOG_DIR/hypermind.log.%Y-%m-%d" &
+go run $DIR/server.go 2>&1 | cronolog "$LOG_DIR/hypermind.log.%Y-%m-%d" &
 echo "The server has been launched."
