@@ -1,6 +1,6 @@
 # hypermind
 
-My personal website written in Go.
+It's the source code of [my personal website](http://hypermind.com.cn) written in Go.
 
 ## Usage
 
