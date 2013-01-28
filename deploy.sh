@@ -7,13 +7,11 @@ else
 	kill $PID
 	echo "The server has stopped!"
 fi
-go build server
-chmod +rx server
 DIR=`pwd`
 LOG_DIR=$DIR/logs
 if [ ! -d "$LOG_DIR" ]; then
 	echo "Creating dir '$LOG_DIR' ..."
 	mkdir "$LOG_DIR"
 fi
-$DIR/server 2>&1 | cronolog "$LOG_DIR/hypermind.log.%Y-%m-%d" &
+go run server.go 2>&1 | cronolog "$LOG_DIR/hypermind.log.%Y-%m-%d" &
 echo "The server has been launched."
