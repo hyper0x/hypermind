@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net/http"
+	"go_lib"
 )
 
 type User struct {
@@ -29,10 +30,10 @@ func init() {
 	rootPrivileges = append(rootPrivileges, Privilege{Name: "user-kanban", Tag: 1})
 	user, err := GetUserFromDb(ROOT_USER_NAME)
 	if err != nil {
-		LogErrorf("RootUserCheckError: %s\n", err)
+		go_lib.LogErrorf("RootUserCheckError: %s\n", err)
 	} else {
 		if user == nil {
-			LogInfo("Initialize root user...")
+			go_lib.LogInfo("Initialize root user...")
 			root := User{
 				LoginName: ROOT_USER_NAME,
 				Password: "hypermind",
@@ -42,9 +43,9 @@ func init() {
 				Remark: "root user"}
 			err = SetUserToDb(root)
 			if err != nil {
-				LogErrorf("RootUserInitError: %s\n", err)
+				go_lib.LogErrorf("RootUserInitError: %s\n", err)
 			} else {
-				LogInfo("Root user initialization is done\n")
+				go_lib.LogInfo("Root user initialization is done\n")
 			}
 		}
 	}
@@ -54,7 +55,7 @@ func GetStagedUserInfo(w http.ResponseWriter, r *http.Request) map[string]string
 	userInfoMap := make(map[string]string)
 	loginName := GetOneCookie(r, LOGIN_NAME_KEY)
 	if len(loginName) == 0 {
-		LogWarnln("The login name is NOT in the cookie of client!")
+		go_lib.LogWarnln("The login name is NOT in the cookie of client!")
 		session := GetSession(w, r)
 		if v := session.Get(LOGIN_NAME_KEY);v != nil {
 			loginName = v.(string)

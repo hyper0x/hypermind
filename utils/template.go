@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"regexp"
+	"go_lib"
 )
 
 func SimpleEqual(args ...interface{}) bool {
@@ -34,7 +35,7 @@ func MatchString(args ...interface{}) bool {
 		pattern := v.(string)
 		pass, err := regexp.MatchString(pattern, target)
 		if err != nil {
-			LogErrorf("RegexpMatchError (target=%s, pattern=%s): %s\n", target, pattern, err)
+			go_lib.LogErrorf("RegexpMatchError (target=%s, pattern=%s): %s\n", target, pattern, err)
 			return false
 		}
 		if !pass {

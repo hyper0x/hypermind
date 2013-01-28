@@ -1,8 +1,10 @@
 package utils
 
-// base
+
+
+// config
 const (
-	CONFIG_FILE_NAME = "go-web-demo.config"
+	CONFIG_FILE_NAME = "hypermind.config"
 	DEFAULT_SERVER_PORT = 9090
 	DEFAULT_REDIS_SERVER_IP = "127.0.0.1"
 	DEFAULT_REDIS_SERVER_PORT = "6379"

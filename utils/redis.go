@@ -4,6 +4,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"errors"
 	"time"
+	"go_lib"
 )
 
 var redisServerIp string
@@ -12,19 +13,19 @@ var redisServerPassword string
 var redisPool *redis.Pool
 
 func init() {
-	myConfig, err := ReadConfig(false)
+	err := myConfig.ReadConfig(false)
 	if err != nil {
-		LogErrorln("ConfigLoadError: ", err)
+		go_lib.LogErrorln("ConfigLoadError: ", err)
 	}
-	redisServerIp = myConfig.RedisServerIp
+	redisServerIp = myConfig.Dict["redis_server_ip"]
 	if len(redisServerIp) == 0 {
 		redisServerIp = DEFAULT_REDIS_SERVER_IP
 	}
-	redisServerPort = myConfig.RedisServerPort
+	redisServerPort = myConfig.Dict["redis_server_port"]
 	if len(redisServerPort) == 0 {
 		redisServerPort = DEFAULT_REDIS_SERVER_PORT
 	}
-	redisServerPassword = myConfig.RedisServerPassword
+	redisServerPassword = myConfig.Dict["redis_server_password"]
 	if len(redisServerPassword) == 0 {
 		redisServerPassword = DEFAULT_REDIS_SERVER_PASSWORD
 	}
@@ -115,7 +116,7 @@ func GetAllUsersFromDb() (map[string]*User, error) {
 	for k, v := range tempContainer {
 		*tempUser, err = UnmarshalUser(string(v))
 		if err != nil {
-			LogErrorf("UnmarshalUserError (json=%s): %s\n", v, err)
+			go_lib.LogErrorf("UnmarshalUserError (json=%s): %s\n", v, err)
 		} else {
 			result[k] = tempUser
 		}
@@ -147,11 +148,11 @@ func exists(key string) bool {
 	defer conn.Close()
 	exists, err := redis.Bool(conn.Do("EXISTS", key))
 	if err != nil {
-		LogErrorf("JudgeKeyExistenceError (key=%s): %s\n ", key, err)
+		go_lib.LogErrorf("JudgeKeyExistenceError (key=%s): %s\n ", key, err)
 		return false
 	}
 	if !exists {
-		LogWarnf("The key '%s' is NONEXISTENCE.\n", key)
+		go_lib.LogWarnf("The key '%s' is NONEXISTENCE.\n", key)
 	}
 	return exists
 }
@@ -160,11 +161,11 @@ func hashFieldExists(key string, field string) bool {
 	conn := redisPool.Get()
 	fieldExists, err := redis.Bool(conn.Do("HEXISTS", REDIS_USER_KEY, field))
 	if err != nil {
-		LogErrorf("JudgeHashFieldExistenceError (key=%s, field=%s): %s\n ", key, field, err)
+		go_lib.LogErrorf("JudgeHashFieldExistenceError (key=%s, field=%s): %s\n ", key, field, err)
 		return false
 	}
 	if !fieldExists {
-		LogWarnf("The field '%s' in hash key '%s' is NONEXISTENCE.\n", field, key)
+		go_lib.LogWarnf("The field '%s' in hash key '%s' is NONEXISTENCE.\n", field, key)
 		return false
 	}
 	return fieldExists

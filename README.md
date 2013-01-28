@@ -1,10 +1,10 @@
-# go-web-demo
+# hypermind
 
-A demo website written in Go.
+My personal website written in Go.
 
 ## Usage
 
-1.  Ensure the project path in $GOPATH
+1.  Ensure the project in dir '$GOPATH/src'
 
 2.  Install [Redis](http://redis.io/) database.
 
@@ -17,8 +17,12 @@ go get github.com/astaxie/session/providers/memory
 
 # redis driver
 go get github.com/garyburd/redigo/redis
+
+# go_lib
+cd <$GOPATH1/src> # $GOPATH1 is the first part of $GOPATH.
+git clone https://github.com/hyper-carrot/go_lib.git
 ```
-4.  Edit go-web-demo.config for your need.
+4.  Edit hypermind.config for your need.
 
 5.  Change mode of script & run:
 
@@ -30,7 +34,7 @@ chmod +x deploy.sh
 
 ## License
  
-Copyright (C) 2012
+Copyright (C) 2013
 
 Distributed under the BSD-style license, the same as Go.
 

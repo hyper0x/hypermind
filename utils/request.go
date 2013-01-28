@@ -13,6 +13,7 @@ import (
 	"bytes"
 	"net/url"
 	"encoding/json"
+	"go_lib"
 )
 
 type RequestInfo struct {
@@ -41,7 +42,7 @@ func GetRequestInfo(r *http.Request) string {
 	requestInfo := RequestInfo{Form: r.Form, Method: r.Method, Path: r.URL.Path, Scheme: r.URL.Scheme}
 	b, err := json.Marshal(requestInfo)
 	if err != nil {
-		LogErrorln("JsonMarshalError:", err)
+		go_lib.LogErrorln("JsonMarshalError:", err)
 	}
 	return string(b)
 }
@@ -66,12 +67,12 @@ func splitHostPort(requestHost string) (host string, port string) {
 		port = requestHost[splitIndex + 1:len(requestHost)]
 	} else {
 		host = requestHost
-		config, err := ReadConfig(false)
+		err := myConfig.ReadConfig(false)
 		if err != nil {
-			LogErrorln("ConfigLoadError: ", err)
+			go_lib.LogErrorln("ConfigLoadError: ", err)
 			port = "80"
 		} else {
-			port = fmt.Sprintf("%v", config.ServerPort)
+			port = fmt.Sprintf("%v", myConfig.Dict["server_port"])
 		}
 	}
 	return
@@ -114,9 +115,9 @@ func DeleteTempFile(delay time.Duration, filePath string) (err error) {
 	time.Sleep(delay)
 	err = os.Remove(filePath)
 	if err != nil {
-		LogErrorf("Occur error when delete file '%s': %s\n", filePath, err)
+		go_lib.LogErrorf("Occur error when delete file '%s': %s\n", filePath, err)
 	} else {
-		LogInfof("The file '%s' is deleted.\n", filePath, err)
+		go_lib.LogInfof("The file '%s' is deleted.\n", filePath, err)
 	}
 	return
 }
