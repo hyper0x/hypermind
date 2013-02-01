@@ -42,12 +42,30 @@
                     <a class="btn btn-small" href="https://github.com/hyper-carrot">hyper-carrot</a>
                     .
                 </p>
+                <p>
+                    <label><h3>CV Authorization Code</h3></label>
+                    <input id="cv_auth_code"type="text" class="input-medium search-query" placeholder="Please inquire with me.">
+                    <button id="cv_submit" type="submit" class="btn">Submit</button>
+                </p>
             </div>
         </div>
     </div>
 </div>
 
 {{template "footer-import"}}
+
+<script>
+$(function () {
+  $('#cv_submit').bind('click', function() {
+    var auth_code = $('#cv_auth_code').val();
+    alert(auth_code);
+    $.post("/get-cv", "auth_code=" + auth_code,
+        function (data, textStatus){
+            alert(data);
+        }, "text");
+    });
+})
+</script>
 
 </body>
 </html>

@@ -1,15 +1,15 @@
 package main
 
 import (
-	"hypermind/utils"
-	"go_lib"
-	"net/http"
-	"fmt"
-	"html/template"
-	"io"
-	"time"
-	"os"
 	"bytes"
+	"fmt"
+	"go_lib"
+	"html/template"
+	"hypermind/utils"
+	"io"
+	"net/http"
+	"os"
+	"time"
 )
 
 func welcome(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +40,52 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		go_lib.LogErrorln("ExecuteTemplateErr:", err)
 	}
+}
+
+func getCv(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if r.Method == "GET" {
+		w.WriteHeader(405)
+		fmt.Fprintln(w, "Please 'POST' to me.")
+		return
+	}
+	userInfoMap := utils.GetStagedUserInfo(w, r)
+	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
+	go_lib.LogInfoln(utils.GetRequestInfo(r))
+	auth_code := r.FormValue(utils.AUTH_CODE)
+	go_lib.LogInfof("Getting CV by user '%s' with input '%s'...\n", loginName, auth_code)
+	pass, err := utils.VerifyAuthCode(auth_code)
+	if err != nil {
+		go_lib.LogErrorf("Occur error when verify auth code: %s\n", err)
+		w.WriteHeader(500)
+		fmt.Fprintln(w, "Oops! Somethin wrong!")
+		return
+	}
+	if !pass {
+		go_lib.LogWarnf("Unauthorized CV getting by user '%s' with input '%s'.\n", loginName, auth_code)
+		w.WriteHeader(401)
+		fmt.Fprintln(w, "Wrong authorization code.")
+		return
+	}
+	cvContent, err := utils.GetCvContent()
+	if err != nil {
+		go_lib.LogErrorf("Occur error when get cv content: %s.\n", err)
+		w.WriteHeader(500)
+		fmt.Fprintln(w, "Oops! Somethin wrong!")
+		return
+	}
+	w.WriteHeader(200)
+	fmt.Fprintln(w, cvContent)
+	go_lib.LogInfof("The CV had taken by user '%s' with input '%s'.\n", loginName, auth_code)
+	newAuthCode, err := utils.NewAuthCode()
+	if err != nil {
+		go_lib.LogErrorf("Occur error when new auth code: %s\n", err)
+		w.WriteHeader(500)
+		fmt.Fprintln(w, "Oops! Somethin wrong!")
+		return
+	}
+	go_lib.LogInfof("The new auth code is '%s'.\n", newAuthCode)
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +119,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 			go_lib.LogInfoln("TokenKey:", tokenKey)
 			storedToken := utils.GetToken(tokenKey)
 			go_lib.LogInfoln("StoredToken:", storedToken)
-			if len(token) > 0 && len(storedToken)> 0 && token == storedToken {
+			if len(token) > 0 && len(storedToken) > 0 && token == storedToken {
 				validToken = true
 			}
 		}
@@ -168,7 +214,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		buffer.WriteString("/")
 		buffer.WriteString(handler.Filename)
 		tempFilePath := buffer.String()
-		f, err := os.OpenFile(tempFilePath, os.O_WRONLY | os.O_CREATE, 0666)
+		f, err := os.OpenFile(tempFilePath, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			go_lib.LogErrorln(err)
 			return
@@ -176,7 +222,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		defer f.Close()
 		go_lib.LogInfoln("Receive a file & save to %s ...\n", tempFilePath)
 		io.Copy(f, file)
-		go utils.DeleteTempFile(time.Duration(time.Minute * 5), tempFilePath)
+		go utils.DeleteTempFile(time.Duration(time.Minute*5), tempFilePath)
 	}
 }
 
@@ -190,7 +236,8 @@ func main() {
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/upload", upload)
-	myConfig := go_lib.Config{Path : utils.CONFIG_FILE_NAME}
+	http.HandleFunc("/get-cv", getCv)
+	myConfig := go_lib.Config{Path: utils.CONFIG_FILE_NAME}
 	err := myConfig.ReadConfig(false)
 	if err != nil {
 		go_lib.LogFatalln("ConfigLoadError: ", err)
