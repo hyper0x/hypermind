@@ -7,7 +7,6 @@ const (
 	DEFAULT_REDIS_SERVER_IP       = "127.0.0.1"
 	DEFAULT_REDIS_SERVER_PORT     = "6379"
 	DEFAULT_REDIS_SERVER_PASSWORD = ""
-	REDIS_USER_KEY                = "user"
 )
 
 // web
@@ -38,4 +37,10 @@ const (
 	MEETING_KANBAN_PAGE     = "meeting-kanban"
 	HASH_RING_PAGE_KEY      = "hashRingPage"
 	HASH_RING_PAGE          = "hash-ring"
+)
+
+// redis
+const (
+	USER_KEY      = "user"
+	AUTH_CODE_KEY = "auth_code"
 )

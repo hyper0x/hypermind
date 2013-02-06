@@ -56,36 +56,28 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 	auth_code := r.FormValue(utils.AUTH_CODE)
 	go_lib.LogInfof("Getting CV by user '%s' with input '%s'...\n", loginName, auth_code)
 	pass, err := utils.VerifyAuthCode(auth_code)
+	w.WriteHeader(200)
 	if err != nil {
 		go_lib.LogErrorf("Occur error when verify auth code: %s\n", err)
-		w.WriteHeader(500)
-		fmt.Fprintln(w, "Oops! Somethin wrong!")
+		// w.WriteHeader(500)
+		fmt.Fprintln(w, "Error: Somethin wrong when verify auth code!")
 		return
 	}
 	if !pass {
 		go_lib.LogWarnf("Unauthorized CV getting by user '%s' with input '%s'.\n", loginName, auth_code)
-		w.WriteHeader(401)
-		fmt.Fprintln(w, "Wrong authorization code.")
+		// w.WriteHeader(401)
+		fmt.Fprintln(w, "FAIL: Wrong authorization code.")
 		return
 	}
 	cvContent, err := utils.GetCvContent()
 	if err != nil {
 		go_lib.LogErrorf("Occur error when get cv content: %s.\n", err)
-		w.WriteHeader(500)
-		fmt.Fprintln(w, "Oops! Somethin wrong!")
+		// w.WriteHeader(500)
+		fmt.Fprintln(w, "Error: Somethin wrong when get CV content!")
 		return
 	}
-	w.WriteHeader(200)
 	fmt.Fprintln(w, cvContent)
 	go_lib.LogInfof("The CV had taken by user '%s' with input '%s'.\n", loginName, auth_code)
-	newAuthCode, err := utils.NewAuthCode()
-	if err != nil {
-		go_lib.LogErrorf("Occur error when new auth code: %s\n", err)
-		w.WriteHeader(500)
-		fmt.Fprintln(w, "Oops! Somethin wrong!")
-		return
-	}
-	go_lib.LogInfof("The new auth code is '%s'.\n", newAuthCode)
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
