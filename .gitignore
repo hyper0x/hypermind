@@ -4,4 +4,4 @@ bin**/*
 out**/*
 pkg**/*
 logs**/*
-resource
+resume.html
