@@ -3,12 +3,8 @@ package utils
 import (
 	"bufio"
 	"bytes"
-	"go_lib"
 	"io"
-	"math/rand"
 	"os"
-	"strconv"
-	"strings"
 )
 
 const (

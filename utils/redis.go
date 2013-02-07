@@ -190,21 +190,23 @@ func GetCurrentAuthCode() (string, error) {
 		return "", err
 	}
 	var currentAuthCode string
-	var buffer bytes.Buffer
-	value := values[0]
-	valueBytes := value.([]byte)
-	for _, v := range valueBytes {
-		buffer.WriteByte(v)
-	}
-	currentAuthCode = buffer.String()
-	go_lib.LogInfof("Current Code: %v\n", currentAuthCode)
-	if len(values) == 0 {
+	if len(values) > 0 {
+		var buffer bytes.Buffer
+	        value := values[0]
+	        valueBytes := value.([]byte)
+	        for _, v := range valueBytes {
+			buffer.WriteByte(v)
+	        }
+	        currentAuthCode = buffer.String()
+	        go_lib.LogInfof("Current Code: %v\n", currentAuthCode)
+	} else {
 		initialAuthCode := generateInitialAuthCode()
 		go_lib.LogInfof("Initial Auth Code: %s\n", initialAuthCode)
 		err = pushAuthCode(initialAuthCode, conn)
 		if err != nil {
 			return "", err
 		}
+		currentAuthCode = initialAuthCode
 	}
 	return currentAuthCode, nil
 }
@@ -241,8 +243,13 @@ func generateInitialAuthCode() string {
 	minute := fmt.Sprintf("%v", now.Minute())
 	buffer.WriteString(minute)
 	if buffer.Len() < 6 {
-		infilling := fmt.Sprintf("%v", rand.Intn(99))
-		buffer.WriteString(infilling)
+		for {
+			infilling := fmt.Sprintf("%v", rand.Intn(99))
+		        buffer.WriteString(infilling)
+			if buffer.Len() >= 6 {
+				break
+			}
+	        }
 	}
 	code := buffer.String()
 	if len(code) > 6 {
