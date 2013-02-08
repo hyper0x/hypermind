@@ -44,19 +44,14 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 
 func getCv(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
+	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if r.Method == "GET" {
-		w.WriteHeader(405)
-		fmt.Fprintln(w, "Please 'POST' to me.")
-		return
-	}
 	userInfoMap := utils.GetStagedUserInfo(w, r)
 	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
 	go_lib.LogInfoln(utils.GetRequestInfo(r))
 	auth_code := r.FormValue(utils.AUTH_CODE)
 	go_lib.LogInfof("Getting CV by user '%s' with input '%s'...\n", loginName, auth_code)
 	pass, err := utils.VerifyAuthCode(auth_code)
-	w.WriteHeader(200)
 	if err != nil {
 		go_lib.LogErrorf("Occur error when verify auth code: %s\n", err)
 		// w.WriteHeader(500)
