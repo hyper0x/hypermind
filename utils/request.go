@@ -1,34 +1,34 @@
 package utils
 
 import (
-	"net/http"
-	"time"
-	"regexp"
-	"io"
-	"crypto/md5"
-	"os"
-	"fmt"
-	"strings"
-	"encoding/base64"
 	"bytes"
-	"net/url"
+	"crypto/md5"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"go_lib"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"regexp"
+	"strings"
+	"time"
 )
 
 type RequestInfo struct {
-	Form url.Values
+	Form   url.Values
 	Method string
-	Path string
+	Path   string
 	Scheme string
 }
 
 var pageParameterMap map[string]string = map[string]string{
-	HOME_PAGE_KEY: HOME_PAGE,
-	ABOUT_ME_PAGE_KEY: ABOUT_ME_PAGE,
+	HOME_PAGE_KEY:           HOME_PAGE,
+	ABOUT_ME_PAGE_KEY:       ABOUT_ME_PAGE,
 	ABOUT_WEBSITE_PAGE_KEY:  ABOUT_WEBSITE_PAGE,
 	MEETING_KANBAN_PAGE_KEY: MEETING_KANBAN_PAGE,
-	HASH_RING_PAGE_KEY: HASH_RING_PAGE,
+	PROJECT_HASH_RING_KEY:   PROJECTS_HASH_RING_PAGE,
 }
 
 func GeneratePagePath(reqPage string) string {
@@ -65,7 +65,7 @@ func GenerateBasicAttrMap(r *http.Request, validLogin bool) map[string]string {
 func splitHostPort(requestHost string) (host string, port string) {
 	if splitIndex := strings.Index(requestHost, ":"); splitIndex > 0 {
 		host = requestHost[0:splitIndex]
-		port = requestHost[splitIndex + 1:len(requestHost)]
+		port = requestHost[splitIndex+1 : len(requestHost)]
 	} else {
 		host = requestHost
 		err := myConfig.ReadConfig(false)
@@ -126,7 +126,7 @@ func DeleteTempFile(delay time.Duration, filePath string) (err error) {
 func EncodePassport(originalPasspord string) (result string) {
 	h := md5.New()
 	io.WriteString(h, originalPasspord)
-    result = fmt.Sprintf("%x", h.Sum(nil))
+	result = fmt.Sprintf("%x", h.Sum(nil))
 	return
 }
 
@@ -145,4 +145,3 @@ func UrlDecoding(s string) string {
 	res.ReadFrom(decoder)
 	return res.String()
 }
-

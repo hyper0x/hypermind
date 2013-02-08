@@ -35,8 +35,8 @@ const (
 	ABOUT_WEBSITE_PAGE      = "about-website"
 	MEETING_KANBAN_PAGE_KEY = "meetingKanbanPage"
 	MEETING_KANBAN_PAGE     = "meeting-kanban"
-	HASH_RING_PAGE_KEY      = "hashRingPage"
-	HASH_RING_PAGE          = "hash-ring"
+	PROJECT_HASH_RING_KEY   = "projectHashRingPage"
+	PROJECTS_HASH_RING_PAGE = "project-hash-ring"
 )
 
 // redis
