@@ -36,7 +36,7 @@ const (
 	MEETING_KANBAN_PAGE_KEY = "meetingKanbanPage"
 	MEETING_KANBAN_PAGE     = "meeting-kanban"
 	PROJECT_HASH_RING_KEY   = "projectHashRingPage"
-	PROJECTS_HASH_RING_PAGE = "project-hash-ring"
+	PROJECT_HASH_RING_PAGE = "project-hash-ring"
 )
 
 // redis
