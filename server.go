@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"go_lib"
 	"html/template"
@@ -11,6 +12,8 @@ import (
 	"os"
 	"time"
 )
+
+var serverPort int = *flag.Int("port", 9091, "the server (http listen) port")
 
 func welcome(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -214,6 +217,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	flag.Parse()
 	fileServer := http.FileServer(http.Dir("web"))
 	http.Handle("/css/", fileServer)
 	http.Handle("/js/", fileServer)
@@ -224,15 +228,11 @@ func main() {
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/upload", upload)
 	http.HandleFunc("/get-cv", getCv)
-	myConfig := go_lib.Config{Path: utils.CONFIG_FILE_NAME}
-	err := myConfig.ReadConfig(false)
+	go_lib.LogInfof("Starting hypermind http server (port=%d)...\n", serverPort)
+	err := http.ListenAndServe(":"+fmt.Sprintf("%d", serverPort), nil)
 	if err != nil {
-		go_lib.LogFatalln("ConfigLoadError: ", err)
+		go_lib.LogFatalln("ListenAndServeError: ", err)
 	} else {
-		addr := ":" + fmt.Sprintf("%v", myConfig.Dict["server_port"])
-		err := http.ListenAndServe(addr, nil)
-		if err != nil {
-			go_lib.LogFatalln("ListenAndServeError: ", err)
-		}
+		go_lib.LogInfoln("Hypermind http server is started.")
 	}
 }
