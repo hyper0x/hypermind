@@ -38,7 +38,7 @@
                     .
                 </p>
                 <p>
-                    The Web site source code in <a href="https://github.com/hyper-carrot/go-web-demo">here</a>
+                    The Web site source code in <a href="https://github.com/hyper-carrot/hypermind">here</a>
                     .
                 </p>
                 <p>
