@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"go_lib"
 	"html/template"
-	"hypermind/utils"
+	"hypermind/core/base"
+	"hypermind/core/dao"
+	"hypermind/core/request"
+	"hypermind/core/session"
 	"io"
 	"net/http"
 	"os"
@@ -15,26 +18,40 @@ import (
 
 var serverPort int = *flag.Int("port", 9091, "the server (http listen) port")
 
+func getSessionMap(w http.ResponseWriter, r *http.Request) (map[string]string, error) {
+	hmSession, err := session.GetMatchedSession(w, r)
+	if err != nil {
+		go_lib.LogErrorln("GetSessionErr:", err)
+		return nil, err
+	}
+	return hmSession.GetAll()
+}
+
 func welcome(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	go_lib.LogInfoln(utils.GetRequestInfo(r))
-	userInfoMap := utils.GetStagedUserInfo(w, r)
-	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
-	attrMap := utils.GenerateBasicAttrMap(r, (len(loginName) > 0))
-	attrMap[utils.LOGIN_NAME_KEY] = loginName
+	go_lib.LogInfoln(request.GetRequestInfo(r))
+	sessionMap, err := getSessionMap(w, r)
+	loginName := ""
+	if err != nil {
+		go_lib.LogErrorln("GetSessionErr:", err)
+	} else {
+		loginName = sessionMap[session.SESSION_GRANTORS_KEY]
+	}
+	attrMap := request.GenerateBasicAttrMap(r, (len(loginName) > 0))
+	attrMap[request.LOGIN_NAME_KEY] = loginName
 	currentPage := r.FormValue("page")
 	if len(currentPage) == 0 {
-		currentPage = utils.HOME_PAGE
+		currentPage = request.HOME_PAGE
 	}
 	t := template.New("welcome page")
 	t.Funcs(template.FuncMap{
-		"equal": utils.SimpleEqual,
-		"match": utils.MatchString,
+		"equal": request.SimpleEqual,
+		"match": request.MatchString,
 	})
-	t, err := t.ParseFiles(utils.GeneratePagePath(currentPage),
-		utils.GeneratePagePath("header"),
-		utils.GeneratePagePath("footer"),
-		utils.GeneratePagePath("navbar"))
+	t, err = t.ParseFiles(request.GeneratePagePath(currentPage),
+		request.GeneratePagePath("header"),
+		request.GeneratePagePath("footer"),
+		request.GeneratePagePath("navbar"))
 	if err != nil {
 		go_lib.LogErrorln("ParseFilesErr:", err)
 	}
@@ -49,12 +66,17 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	userInfoMap := utils.GetStagedUserInfo(w, r)
-	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
-	go_lib.LogInfoln(utils.GetRequestInfo(r))
-	auth_code := r.FormValue(utils.AUTH_CODE)
+	sessionMap, err := getSessionMap(w, r)
+	loginName := ""
+	if err != nil {
+		go_lib.LogErrorln("GetSessionErr:", err)
+	} else {
+		loginName = sessionMap[session.SESSION_GRANTORS_KEY]
+	}
+	go_lib.LogInfoln(request.GetRequestInfo(r))
+	auth_code := r.FormValue(request.AUTH_CODE)
 	go_lib.LogInfof("Getting CV by user '%s' with input '%s'...\n", loginName, auth_code)
-	pass, err := utils.VerifyAuthCode(auth_code)
+	pass, err := dao.VerifyAuthCode(auth_code)
 	if err != nil {
 		go_lib.LogErrorf("Occur error when verify auth code: %s\n", err)
 		// w.WriteHeader(500)
@@ -67,7 +89,7 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "FAIL: Wrong authorization code.")
 		return
 	}
-	cvContent, err := utils.GetCvContent()
+	cvContent, err := base.GetCvContent()
 	if err != nil {
 		go_lib.LogErrorf("Occur error when get cv content: %s.\n", err)
 		// w.WriteHeader(500)
@@ -80,18 +102,23 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 
 func login(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	go_lib.LogInfoln(utils.GetRequestInfo(r))
-	userInfoMap := utils.GetStagedUserInfo(w, r)
-	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
+	go_lib.LogInfoln(request.GetRequestInfo(r))
+	sessionMap, err := getSessionMap(w, r)
+	loginName := ""
+	if err != nil {
+		go_lib.LogErrorln("GetSessionErr:", err)
+	} else {
+		loginName = sessionMap[session.SESSION_GRANTORS_KEY]
+	}
 	if r.Method == "GET" {
-		tokenKey := utils.GenerateTokenKey(loginName, r)
+		tokenKey := request.GenerateTokenKey(loginName, r)
 		go_lib.LogInfoln("TokenKey:", tokenKey)
-		token := utils.GenerateToken()
+		token := request.GenerateToken()
 		go_lib.LogInfo("Token:", token)
-		utils.SetToken(tokenKey, token)
-		attrMap := utils.GenerateBasicAttrMap(r, false)
+		request.SetToken(tokenKey, token)
+		attrMap := request.GenerateBasicAttrMap(r, false)
 		attrMap["token"] = token
-		t, err := template.ParseFiles(utils.GeneratePagePath("login"))
+		t, err := template.ParseFiles(request.GeneratePagePath("login"))
 		if err != nil {
 			go_lib.LogErrorln("TemplateParseErr:", err)
 		}
@@ -105,31 +132,32 @@ func login(w http.ResponseWriter, r *http.Request) {
 		go_lib.LogInfoln("Token:", token)
 		validToken := false
 		if token != "" {
-			tokenKey := utils.GenerateTokenKey(loginName, r)
+			tokenKey := request.GenerateTokenKey(loginName, r)
 			go_lib.LogInfoln("TokenKey:", tokenKey)
-			storedToken := utils.GetToken(tokenKey)
+			storedToken := request.GetToken(tokenKey)
 			go_lib.LogInfoln("StoredToken:", storedToken)
 			if len(token) > 0 && len(storedToken) > 0 && token == storedToken {
 				validToken = true
 			}
 		}
-		loginName = template.HTMLEscapeString(r.Form.Get(utils.LOGIN_NAME_KEY))
+		loginName = template.HTMLEscapeString(r.Form.Get(request.LOGIN_NAME_KEY))
 		go_lib.LogInfoln("login - loginName:", loginName)
-		password := template.HTMLEscapeString(r.Form.Get(utils.PASSWORD_KEY))
+		password := template.HTMLEscapeString(r.Form.Get(request.PASSWORD_KEY))
 		go_lib.LogInfoln("login - password:", password)
 		rememberMe := r.Form.Get("remember-me")
 		go_lib.LogInfoln("login - remember-me:", rememberMe)
-		validLogin, err := utils.VerifyUser(loginName, password)
+		validLogin, err := dao.VerifyUser(loginName, password)
 		go_lib.LogInfoln("Verify user:", validLogin)
 		if err != nil {
 			go_lib.LogErrorf("VerifyUserError (loginName=%s): %s\n", loginName, err)
 		} else {
-			rememberMeTag := r.Form.Get("remember-me")
 			if validLogin {
 				if validToken {
-					userInfoMap[utils.LOGIN_NAME_KEY] = loginName
-					onlySession := len(rememberMeTag) == 0 || rememberMeTag != "y"
-					utils.SetUserInfoToStage(userInfoMap, w, r, onlySession)
+					longTerm := len(rememberMe) == 0 || rememberMe != "y"
+					_, err = session.NewSession(loginName, longTerm, w, r)
+					if err != nil {
+						go_lib.LogErrorf("SetSessionError (loginName=%s): %s\n", loginName, err)
+					}
 				}
 			}
 		}
@@ -139,40 +167,50 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 func logout(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	go_lib.LogInfoln(utils.GetRequestInfo(r))
-	userInfoMap := utils.GetStagedUserInfo(w, r)
-	loginName := userInfoMap[utils.LOGIN_NAME_KEY]
-	if len(loginName) > 0 {
-		utils.RemoveUserInfoFromStage(userInfoMap, w, r)
-		go_lib.LogInfoln("Logout: The user '%s' has  logout.\n", loginName)
+	go_lib.LogInfoln(request.GetRequestInfo(r))
+	hmSession, err := session.GetMatchedSession(w, r)
+	if err != nil {
+		go_lib.LogErrorln("GetSessionErr:", err)
+	}
+	if hmSession != nil {
+		loginName, err := hmSession.Get(session.SESSION_GRANTORS_KEY)
+		if err != nil {
+			go_lib.LogErrorln("GetLoginNameErr:", err)
+		}
+		done, err := hmSession.Destroy()
+		if err != nil {
+			go_lib.LogErrorln("DestroySessionErr:", err)
+		} else {
+			go_lib.LogInfoln("Logout: User '%s' logout. (result=%v)\n", loginName, done)
+		}
 	} else {
-		go_lib.LogInfoln("Logout: The user '%s' has yet login.\n", loginName)
+		go_lib.LogInfoln("Logout: Current visitor has yet login.\n")
 	}
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	go_lib.LogInfoln(utils.GetRequestInfo(r))
+	go_lib.LogInfoln(request.GetRequestInfo(r))
 	if r.Method == "GET" {
-		attrMap := utils.GenerateBasicAttrMap(r, false)
+		attrMap := request.GenerateBasicAttrMap(r, false)
 		encodedHint := r.FormValue("hint")
 		if len(encodedHint) > 0 {
-			hint := utils.UrlDecoding(encodedHint)
+			hint := request.UrlDecoding(encodedHint)
 			attrMap["hint"] = hint
 		}
-		t, _ := template.ParseFiles(utils.GeneratePagePath("register"))
+		t, _ := template.ParseFiles(request.GeneratePagePath("register"))
 		err := t.Execute(w, attrMap)
 		if err != nil {
 			go_lib.LogErrorln("PageWriteErr:", err)
 		}
 	} else {
-		fieldMap, invalidFields := utils.VerifyRegisterForm(r)
+		fieldMap, invalidFields := request.VerifyRegisterForm(r)
 		go_lib.LogInfoln("The field map:", fieldMap)
 		if len(invalidFields) > 0 {
 			hint := fmt.Sprintln("There are some invalid fields of '':", invalidFields, ".")
 			go_lib.LogInfoln(hint)
-			encodedHint := utils.UrlEncoding(hint)
+			encodedHint := request.UrlEncoding(hint)
 			redirectUrl := "/register?hint=" + encodedHint
 			http.Redirect(w, r, redirectUrl, http.StatusFound)
 		} else {
@@ -182,10 +220,10 @@ func register(w http.ResponseWriter, r *http.Request) {
 }
 
 func upload(w http.ResponseWriter, r *http.Request) {
-	go_lib.LogInfoln(utils.GetRequestInfo(r))
+	go_lib.LogInfoln(request.GetRequestInfo(r))
 	if r.Method == "GET" {
 		token := r.Form.Get("token")
-		t, _ := template.ParseFiles(utils.GeneratePagePath("upload"))
+		t, _ := template.ParseFiles(request.GeneratePagePath("upload"))
 		err := t.Execute(w, token)
 		if err != nil {
 			go_lib.LogErrorln("PageWriteErr:", err)
@@ -212,7 +250,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		defer f.Close()
 		go_lib.LogInfoln("Receive a file & save to %s ...\n", tempFilePath)
 		io.Copy(f, file)
-		go utils.DeleteTempFile(time.Duration(time.Minute*5), tempFilePath)
+		go request.DeleteTempFile(time.Duration(time.Minute*5), tempFilePath)
 	}
 }
 

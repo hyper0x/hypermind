@@ -1,4 +1,4 @@
-package utils
+package request
 
 import (
 	"net/http"

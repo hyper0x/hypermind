@@ -1,18 +1,4 @@
-package utils
-
-// config
-const (
-	CONFIG_FILE_NAME              = "hypermind.config"
-	DEFAULT_SERVER_PORT           = 9090
-	DEFAULT_REDIS_SERVER_IP       = "127.0.0.1"
-	DEFAULT_REDIS_SERVER_PORT     = "6379"
-	DEFAULT_REDIS_SERVER_PASSWORD = ""
-)
-
-// web
-const (
-	COOKIE_LIFE_CYCLE_MINUTES int = 60
-)
+package request
 
 // request parameter
 const (
@@ -37,10 +23,4 @@ const (
 	MEETING_KANBAN_PAGE     = "meeting-kanban"
 	PROJECT_HASH_RING_KEY   = "projectHashRingPage"
 	PROJECT_HASH_RING_PAGE = "project-hash-ring"
-)
-
-// redis
-const (
-	USER_KEY      = "user"
-	AUTH_CODE_KEY = "auth_code"
 )

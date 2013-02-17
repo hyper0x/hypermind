@@ -1,4 +1,4 @@
-package utils
+package request
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_lib"
+	"hypermind/core/base"
 	"io"
 	"net/http"
 	"net/url"
@@ -68,12 +69,13 @@ func splitHostPort(requestHost string) (host string, port string) {
 		port = requestHost[splitIndex+1 : len(requestHost)]
 	} else {
 		host = requestHost
-		err := myConfig.ReadConfig(false)
+		config := base.GetHmConfig()
+		err := config.ReadConfig(false)
 		if err != nil {
 			go_lib.LogErrorln("ConfigLoadError: ", err)
 			port = "80"
 		} else {
-			port = fmt.Sprintf("%v", myConfig.Dict["server_port"])
+			port = fmt.Sprintf("%v", config.Dict["server_port"])
 		}
 	}
 	return
