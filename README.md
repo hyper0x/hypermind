@@ -11,10 +11,6 @@ It's the source code of [my personal website](http://hypermind.com.cn) written i
 3.  Get and install the library dependencies:
 
 ```bash
-# session manager 
-go get github.com/astaxie/session
-go get github.com/astaxie/session/providers/memory
-
 # redis driver
 go get github.com/garyburd/redigo/redis
 
