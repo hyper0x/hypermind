@@ -10,16 +10,16 @@
             <a class="brand" href="#">Hypermind</a>
             <div class="nav-collapse collapse">
                 <ul class="nav">
-                {{if allTrue .homePage}}
+                {{if allTrue .home}}
                     <li {{if equal .currentPage .homePage}}class="active"{{end}}><a href="/?page={{.homePage}}">Home</a></li>
                 {{end}}
-                {{if allTrue .meetingKanbanPage}}
+                {{if allTrue .meeting_kanban}}
                     <li {{if equal .currentPage .meetingKanbanPage}}class="active"{{end}}><a href="/?page={{.meetingKanbanPage}}">Meeting Kanban</a></li>
                 {{end}}
-                {{if allTrue .projectHashRingPage}}
+                {{if allTrue .project_hash_ring}}
                     <li {{if match .currentPage "^project-.*"}}class="active"{{end}}><a href="/?page={{.projectHashRingPage}}">Projects</a></li>
                 {{end}}
-                {{if allTrue .aboutMePage .aboutWebsitePage}}
+                {{if allTrue .about_me .about_website}}
                     <li {{if match .currentPage "^about-.*"}}class="active"{{end}}><a href="/?page={{.aboutMePage}}">About</a></li>
                 {{end}} 
                 </ul>

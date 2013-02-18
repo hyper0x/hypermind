@@ -21,7 +21,7 @@
             <div class="well sidebar-nav">
                 <ul class="nav nav-list">
                     <li class="nav-header">About</li>
-                {{if allTrue .aboutMePage}
+                {{if allTrue .about_me}}
                     <li><a href="/?page={{.aboutMePage}}">About Me</a></li>
                 {{end}}
                     <li class="active"><a href="/?{{.aboutWebsitePage}}">About Website</a></li>

@@ -17,6 +17,15 @@ type UserGroup struct {
 	Rights GroupRights
 }
 
+var guestGroupRightsDict map[string]string = map[string]string{
+	base.HOME_PAGE:              "true",
+	base.ABOUT_ME_PAGE:          "true",
+	base.ABOUT_WEBSITE_PAGE:     "true",
+	base.MEETING_KANBAN_PAGE:    "false",
+	base.PROJECT_HASH_RING_PAGE: "true",
+	base.ADMIN_CV_PAGE:          "false",
+}
+
 var normalGroupRightsDict map[string]string = map[string]string{
 	base.HOME_PAGE:              "true",
 	base.ABOUT_ME_PAGE:          "true",
@@ -63,9 +72,9 @@ func init() {
 	}
 }
 
-func GetDefaultPageRights() map[string]string {
+func GetGuestPageRights() map[string]string {
 	copy := make(map[string]string)
-	for k, v := range normalGroupRightsDict {
+	for k, v := range guestGroupRightsDict {
 		copy[k] = v
 	}
 	return copy

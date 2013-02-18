@@ -25,11 +25,11 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	attrMap := request.GenerateBasicAttrMap(w, r)
 	currentPage := r.FormValue("page")
 	if len(currentPage) == 0 {
-		currentPage = request.HOME_PAGE
+		currentPage = base.HOME_PAGE
 	}
 	pageRightsTag := attrMap[currentPage]
 	if pageRightsTag != "true" {
-		currentPage = request.HOME_PAGE
+		currentPage = base.HOME_PAGE
 	}
 	t := template.New("welcome page")
 	t.Funcs(template.FuncMap{

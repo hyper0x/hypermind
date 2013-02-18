@@ -27,12 +27,12 @@ type RequestInfo struct {
 }
 
 var pageParameterMap map[string]string = map[string]string{
-	HOME_PAGE_KEY:           HOME_PAGE,
-	ABOUT_ME_PAGE_KEY:       ABOUT_ME_PAGE,
-	ABOUT_WEBSITE_PAGE_KEY:  ABOUT_WEBSITE_PAGE,
-	MEETING_KANBAN_PAGE_KEY: MEETING_KANBAN_PAGE,
-	PROJECT_HASH_RING_KEY:   PROJECT_HASH_RING_PAGE,
-	ADMIN_CV_KEY:            ADMIN_CV_PAGE,
+	base.HOME_PAGE_KEY:           base.HOME_PAGE,
+	base.ABOUT_ME_PAGE_KEY:       base.ABOUT_ME_PAGE,
+	base.ABOUT_WEBSITE_PAGE_KEY:  base.ABOUT_WEBSITE_PAGE,
+	base.MEETING_KANBAN_PAGE_KEY: base.MEETING_KANBAN_PAGE,
+	base.PROJECT_HASH_RING_KEY:   base.PROJECT_HASH_RING_PAGE,
+	base.ADMIN_CV_KEY:            base.ADMIN_CV_PAGE,
 }
 
 func GeneratePagePath(reqPage string) string {
@@ -64,11 +64,19 @@ func GenerateBasicAttrMap(w http.ResponseWriter, r *http.Request) map[string]str
 	if err != nil {
 		go_lib.LogErrorln("GetSessionError: %s\n", err)
 	} else {
-		pageRights := getPageRights(hmSession)
+		var pageRights map[string]string
+		var loginName string
+		if hmSession != nil {
+			pageRights = getPageRights(hmSession)
+			loginName = getLoginName(hmSession)
+		} else {
+			pageRights = rights.GetGuestPageRights()
+			loginName = ""
+		}
 		for p, r := range pageRights {
 			attrMap[p] = r
 		}
-		loginName := getLoginName(hmSession)
+
 		attrMap[LOGIN_NAME_KEY] = loginName
 	}
 	return attrMap

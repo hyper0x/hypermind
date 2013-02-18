@@ -21,7 +21,7 @@
             <div class="well sidebar-nav">
                 <ul class="nav nav-list">
                     <li class="nav-header">Projects</li>
-                {{if allTrue .projectHashRingPage}}
+                {{if allTrue .project_hash_ring}}
                     <li class="active"><a href="/?page={{.projectHashRingPage}}">Hash Ring</a></li>
                 {{end}}
                 </ul>
