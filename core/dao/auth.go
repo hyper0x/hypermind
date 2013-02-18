@@ -32,7 +32,7 @@ func VerifyAuthCode(authCode string) (bool, error) {
 				}
 			}
 			if len(newAuthCode) > 0 {
-				conn := redisPool.Get()
+				conn := RedisPool.Get()
 				defer conn.Close()
 				err = pushAuthCode(newAuthCode, conn)
 				if err != nil {
@@ -45,7 +45,7 @@ func VerifyAuthCode(authCode string) (bool, error) {
 }
 
 func GetCurrentAuthCode() (string, error) {
-	conn := redisPool.Get()
+	conn := RedisPool.Get()
 	defer conn.Close()
 	values, err := redis.Values(conn.Do("LRANGE", AUTH_CODE_KEY, 0, 0))
 	if err != nil {
@@ -54,13 +54,13 @@ func GetCurrentAuthCode() (string, error) {
 	var currentAuthCode string
 	if len(values) > 0 {
 		var buffer bytes.Buffer
-	        value := values[0]
-	        valueBytes := value.([]byte)
-	        for _, v := range valueBytes {
+		value := values[0]
+		valueBytes := value.([]byte)
+		for _, v := range valueBytes {
 			buffer.WriteByte(v)
-	        }
-	        currentAuthCode = buffer.String()
-	        go_lib.LogInfof("Current Code: %v\n", currentAuthCode)
+		}
+		currentAuthCode = buffer.String()
+		go_lib.LogInfof("Current Code: %v\n", currentAuthCode)
 	} else {
 		initialAuthCode := generateInitialAuthCode()
 		go_lib.LogInfof("Initial Auth Code: %s\n", initialAuthCode)
@@ -74,7 +74,7 @@ func GetCurrentAuthCode() (string, error) {
 }
 
 func GetAndNewAuthCode() (string, error) {
-	conn := redisPool.Get()
+	conn := RedisPool.Get()
 	defer conn.Close()
 	newAuthCode := generateAuthCode()
 	go_lib.LogInfof("New Auth Code: %s\n", newAuthCode)
@@ -107,11 +107,11 @@ func generateInitialAuthCode() string {
 	if buffer.Len() < 6 {
 		for {
 			infilling := fmt.Sprintf("%v", rand.Intn(99))
-		        buffer.WriteString(infilling)
+			buffer.WriteString(infilling)
 			if buffer.Len() >= 6 {
 				break
 			}
-	        }
+		}
 	}
 	code := buffer.String()
 	if len(code) > 6 {

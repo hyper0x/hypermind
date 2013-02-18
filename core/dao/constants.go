@@ -18,10 +18,11 @@ const (
 	MOBILE_PHONE_FIELD = "mobile_phone"
 	RIGHTS_FIELD       = "rights"
 	REMARK_FIELD       = "remark"
+	USER_GROUP_KEY     = "hmusergroup"
 )
 
-// user rights
+// user group
 const (
-	ROOT_RIGHTS   = "00-111111"
-	NORMAL_RIGHTS = "01-111111"
+	NORMAL_USER_GROUP_NAME = "normal"
+	ADMIN_USER_GROUP_NAME  = "admin"
 )

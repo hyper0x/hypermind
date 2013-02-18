@@ -1,8 +1,9 @@
-package dao
+package rights
 
 import (
 	"errors"
 	"hypermind/core/base"
+	"hypermind/core/dao"
 )
 
 type User struct {
@@ -10,57 +11,60 @@ type User struct {
 	Password    string
 	Email       string
 	MobilePhone string
-	Rights      string
+	Group       string
 	Remark      string
 }
 
-func AddUserToDb(user *User) error {
-	loginName := user.LoginName
+func AddUser(user *User) error {
 	if user == nil || user.LoginName == "" {
-		return errors.New("The parameter named user is NOT Ready! (loginName=\"\")")
+		return errors.New("The parameter named user is NOT Ready!")
 	}
+	loginName := user.LoginName
 	userKey := getUserKey(loginName)
-	userInfoMap := make(map[string]string, 6)
+	userInfoMap := make(map[string]string)
 	userInfoMap[LOGIN_NAME_FIELD] = loginName
 	userInfoMap[PASSWORD_FIELD] = encryptPassword(user.Password)
 	userInfoMap[EMAIL_FIELD] = user.Email
 	userInfoMap[MOBILE_PHONE_FIELD] = user.MobilePhone
-	userInfoMap[RIGHTS_FIELD] = user.Rights
+	userInfoMap[GROUP_FIELD] = user.Group
 	userInfoMap[REMARK_FIELD] = user.Remark
-	conn := redisPool.Get()
+	conn := dao.RedisPool.Get()
 	defer conn.Close()
-	err := SetHashBatch(userKey, userInfoMap)
+	err := dao.SetHashBatch(userKey, userInfoMap)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetUserFromDb(loginName string) (*User, error) {
+func GetUser(loginName string) (*User, error) {
 	if len(loginName) == 0 {
 		return nil, errors.New("The parameter named loginName is EMPTY!")
 	}
 	userKey := getUserKey(loginName)
-	userInfoMap, err := GetHashAll(userKey)
+	userInfoMap, err := dao.GetHashAll(userKey)
 	if err != nil {
 		return nil, err
+	}
+	if len(userInfoMap) == 0 {
+		return nil, nil
 	}
 	user := new(User)
 	user.LoginName = userInfoMap[LOGIN_NAME_FIELD]
 	user.Password = userInfoMap[PASSWORD_FIELD]
 	user.Email = userInfoMap[EMAIL_FIELD]
 	user.MobilePhone = userInfoMap[MOBILE_PHONE_FIELD]
-	user.Rights = userInfoMap[RIGHTS_FIELD]
+	user.Group = userInfoMap[GROUP_FIELD]
 	user.Remark = userInfoMap[REMARK_FIELD]
 	return user, nil
 }
 
-func DeleteUserFromDb(loginName string) error {
+func DeleteUser(loginName string) error {
 	if len(loginName) == 0 {
 		return errors.New("The parameter named loginName is EMPTY!")
 	}
 	userKey := getUserKey(loginName)
-	err := DelKey(userKey)
+	err := dao.DelKey(userKey)
 	if err != nil {
 		return err
 	}
@@ -68,7 +72,7 @@ func DeleteUserFromDb(loginName string) error {
 }
 
 func VerifyUser(loginName string, password string) (bool, error) {
-	user, err := GetUserFromDb(loginName)
+	user, err := GetUser(loginName)
 	if err != nil {
 		return false, err
 	}
@@ -80,7 +84,7 @@ func VerifyUser(loginName string, password string) (bool, error) {
 }
 
 func getUserKey(loginName string) string {
-	return USER_KEY_PREFIX + loginName
+	return dao.USER_KEY_PREFIX + loginName
 }
 
 func encryptPassword(password string) (result string) {

@@ -9,6 +9,7 @@ import (
 	"hypermind/core/base"
 	"hypermind/core/dao"
 	"hypermind/core/request"
+	"hypermind/core/rights"
 	"hypermind/core/session"
 	"io"
 	"net/http"
@@ -146,7 +147,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		go_lib.LogInfoln("login - password:", password)
 		rememberMe := r.Form.Get("remember-me")
 		go_lib.LogInfoln("login - remember-me:", rememberMe)
-		validLogin, err := dao.VerifyUser(loginName, password)
+		validLogin, err := rights.VerifyUser(loginName, password)
 		go_lib.LogInfoln("Verify user:", validLogin)
 		if err != nil {
 			go_lib.LogErrorf("VerifyUserError (loginName=%s): %s\n", loginName, err)

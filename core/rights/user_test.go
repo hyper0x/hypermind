@@ -1,4 +1,4 @@
-package dao
+package rights
 
 import (
 	"runtime/debug"
@@ -13,28 +13,28 @@ func TestUser(t *testing.T) {
 			t.Errorf("Fatal Error: %s\n", err)
 		}
 	}()
-	loginName := "root0"
+	loginName := "testing_user"
 	password := "hypermind"
 	email := "freej.cn@gmail.com"
 	mobilePhone := "8618610000000"
-	rights := ROOT_RIGHTS
-	remark := "Testing root user"
+	group := NORMAL_USER_GROUP_NAME
+	remark := "Testing user"
 	user0 := &User{
 		LoginName:   loginName,
 		Password:    password,
 		Email:       email,
 		MobilePhone: mobilePhone,
-		Rights:      rights,
+		Group:       group,
 		Remark:      remark}
 	if debugTag {
 		t.Logf("User0: %v\n", user0)
 	}
-	err := AddUserToDb(user0)
+	err := AddUser(user0)
 	if err != nil {
 		t.Errorf("Error: Add User Error: %s\n", err)
 		t.FailNow()
 	}
-	user1, err := GetUserFromDb(loginName)
+	user1, err := GetUser(loginName)
 	if err != nil {
 		t.Errorf("Error: Get User Error: %s\n", err)
 		t.FailNow()
@@ -46,9 +46,9 @@ func TestUser(t *testing.T) {
 		user1.Password != encryptPassword(password) ||
 		user1.Email != email ||
 		user1.MobilePhone != mobilePhone ||
-		user1.Rights != rights ||
+		user1.Group != group ||
 		user1.Remark != remark {
-		t.Errorf("Error: The user should be %v but %v. (negligible password)\n", user0, user1)
+		t.Errorf("Fail: The user should be %v but %v. (negligible password)\n", user0, user1)
 		t.FailNow()
 	}
 	pass, err := VerifyUser(loginName, password)
@@ -57,12 +57,21 @@ func TestUser(t *testing.T) {
 		t.FailNow()
 	}
 	if !pass {
-		t.Errorf("Error: The password of user (loginName=%s) should equals %s. \n", loginName, password)
+		t.Errorf("Fail: The password of user (loginName=%s) should equals %s. \n", loginName, password)
 		t.FailNow()
 	}
-	err = DeleteUserFromDb(loginName)
+	err = DeleteUser(loginName)
 	if err != nil {
 		t.Errorf("Error: Delete User Error: %s\n", err)
+		t.FailNow()
+	}
+	user3, err := GetUser(loginName)
+	if err != nil {
+		t.Errorf("Error: Get User Error: %s\n", err)
+		t.FailNow()
+	}
+	if user3 != nil {
+		t.Errorf("Fail: The user '%v' should be deleted. %s\n", user3)
 		t.FailNow()
 	}
 }
