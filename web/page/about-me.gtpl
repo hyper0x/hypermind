@@ -22,7 +22,9 @@
                 <ul class="nav nav-list">
                     <li class="nav-header">About</li>
                     <li class="active"><a href="/?page={{.aboutMePage}}">About Me</a></li>
+                {{if allTrue .aboutWebsitePage}}
                     <li><a href="/?page={{.aboutWebsitePage}}">About Website</a></li>
+                {{end}}
                 </ul>
             </div>
         </div>

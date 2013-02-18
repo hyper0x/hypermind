@@ -10,19 +10,7 @@ const (
 
 // redis key
 const (
-	AUTH_CODE_KEY      = "auth_code"
-	USER_KEY_PREFIX    = "hmuser-"
-	LOGIN_NAME_FIELD   = "login_name"
-	PASSWORD_FIELD     = "password"
-	EMAIL_FIELD        = "email"
-	MOBILE_PHONE_FIELD = "mobile_phone"
-	RIGHTS_FIELD       = "rights"
-	REMARK_FIELD       = "remark"
-	USER_GROUP_KEY     = "hmusergroup"
-)
-
-// user group
-const (
-	NORMAL_USER_GROUP_NAME = "normal"
-	ADMIN_USER_GROUP_NAME  = "admin"
+	AUTH_CODE_KEY   = "auth_code"
+	USER_KEY_PREFIX = "hmuser-"
+	USER_GROUP_KEY  = "hmusergroup"
 )

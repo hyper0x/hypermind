@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-type HmCookie struct {
+type MyCookie struct {
 	key string
 }
 
-func (self *HmCookie) SetOne(
+func (self *MyCookie) SetOne(
 	w http.ResponseWriter,
 	name string,
 	value string,
@@ -23,7 +23,7 @@ func (self *HmCookie) SetOne(
 	return true
 }
 
-func (self *HmCookie) Set(
+func (self *MyCookie) Set(
 	w http.ResponseWriter,
 	data map[string]string,
 	maxAge int) bool {
@@ -38,7 +38,7 @@ func (self *HmCookie) Set(
 	return true
 }
 
-func (self *HmCookie) GetOne(name string, r *http.Request) (value string) {
+func (self *MyCookie) GetOne(name string, r *http.Request) (value string) {
 	if len(name) == 0 {
 		return
 	}
@@ -55,7 +55,7 @@ func (self *HmCookie) GetOne(name string, r *http.Request) (value string) {
 	return
 }
 
-func (self *HmCookie) Get(r *http.Request) map[string]string {
+func (self *MyCookie) Get(r *http.Request) map[string]string {
 	keyLength := len(self.key)
 	cookieMap := make(map[string]string)
 	for _, cookie := range r.Cookies() {
@@ -68,7 +68,7 @@ func (self *HmCookie) Get(r *http.Request) map[string]string {
 	return cookieMap
 }
 
-func (self *HmCookie) Delete(cookieName string, w http.ResponseWriter) bool {
+func (self *MyCookie) Delete(cookieName string, w http.ResponseWriter) bool {
 	if len(cookieName) == 0 {
 		return false
 	}

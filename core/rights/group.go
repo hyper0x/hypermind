@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"go_lib"
+	"hypermind/core/base"
 	"hypermind/core/dao"
-	"hypermind/core/request"
 )
 
 type GroupRights struct {
-	Dict map[string]string
+	PageRights map[string]string
 }
 
 type UserGroup struct {
@@ -18,26 +18,26 @@ type UserGroup struct {
 }
 
 var normalGroupRightsDict map[string]string = map[string]string{
-	request.HOME_PAGE:              "true",
-	request.ABOUT_ME_PAGE:          "true",
-	request.ABOUT_WEBSITE_PAGE:     "true",
-	request.MEETING_KANBAN_PAGE:    "true",
-	request.PROJECT_HASH_RING_PAGE: "true",
-	request.ADMIN_CV_PAGE:          "false",
+	base.HOME_PAGE:              "true",
+	base.ABOUT_ME_PAGE:          "true",
+	base.ABOUT_WEBSITE_PAGE:     "true",
+	base.MEETING_KANBAN_PAGE:    "true",
+	base.PROJECT_HASH_RING_PAGE: "true",
+	base.ADMIN_CV_PAGE:          "false",
 }
 
 var adminGroupRightsDict map[string]string = map[string]string{
-	request.HOME_PAGE:              "true",
-	request.ABOUT_ME_PAGE:          "true",
-	request.ABOUT_WEBSITE_PAGE:     "true",
-	request.MEETING_KANBAN_PAGE:    "true",
-	request.PROJECT_HASH_RING_PAGE: "true",
-	request.ADMIN_CV_PAGE:          "true",
+	base.HOME_PAGE:              "true",
+	base.ABOUT_ME_PAGE:          "true",
+	base.ABOUT_WEBSITE_PAGE:     "true",
+	base.MEETING_KANBAN_PAGE:    "true",
+	base.PROJECT_HASH_RING_PAGE: "true",
+	base.ADMIN_CV_PAGE:          "true",
 }
 
 var userGroupMap map[string]GroupRights = map[string]GroupRights{
-	NORMAL_USER_GROUP_NAME: GroupRights{Dict: normalGroupRightsDict},
-	ADMIN_USER_GROUP_NAME:  GroupRights{Dict: adminGroupRightsDict},
+	NORMAL_USER_GROUP_NAME: GroupRights{PageRights: normalGroupRightsDict},
+	ADMIN_USER_GROUP_NAME:  GroupRights{PageRights: adminGroupRightsDict},
 }
 
 func init() {
@@ -63,6 +63,14 @@ func init() {
 	}
 }
 
+func GetDefaultPageRights() map[string]string {
+	copy := make(map[string]string)
+	for k, v := range normalGroupRightsDict {
+		copy[k] = v
+	}
+	return copy
+}
+
 func UnmarshalGroupRights(literals string) (GroupRights, error) {
 	var rights GroupRights
 	err := json.Unmarshal([]byte(literals), &rights)
@@ -81,7 +89,7 @@ func MarshalGroupRights(rights GroupRights) (string, error) {
 }
 
 func AddUserGroup(userGroup *UserGroup) error {
-	if userGroup == nil || userGroup.Name == "" || len(userGroup.Rights.Dict) == 0 {
+	if userGroup == nil || userGroup.Name == "" || len(userGroup.Rights.PageRights) == 0 {
 		return errors.New("The parameter named userGroup is NOT Ready!")
 	}
 	groupRightsLiterals, err := MarshalGroupRights(userGroup.Rights)

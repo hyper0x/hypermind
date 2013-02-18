@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"go_lib"
 	"hypermind/core/base"
+	"hypermind/core/rights"
+	"hypermind/core/session"
 	"io"
 	"net/http"
 	"net/url"
@@ -50,18 +52,84 @@ func GetRequestInfo(r *http.Request) string {
 	return string(b)
 }
 
-func GenerateBasicAttrMap(r *http.Request, validLogin bool) map[string]string {
+func GenerateBasicAttrMap(w http.ResponseWriter, r *http.Request) map[string]string {
 	attrMap := make(map[string]string)
 	host, port := splitHostPort(r.Host)
 	attrMap["serverAddr"] = host
 	attrMap["serverPort"] = port
-	if validLogin {
-		attrMap["validLogin"] = "true"
-	}
 	for pageKey, page := range pageParameterMap {
 		attrMap[pageKey] = page
 	}
+	hmSession, err := GetSession(w, r)
+	if err != nil {
+		go_lib.LogErrorln("GetSessionError: %s\n", err)
+	} else {
+		pageRights := getPageRights(hmSession)
+		for p, r := range pageRights {
+			attrMap[p] = r
+		}
+		loginName := getLoginName(hmSession)
+		attrMap[LOGIN_NAME_KEY] = loginName
+	}
 	return attrMap
+}
+
+func GetSession(w http.ResponseWriter, r *http.Request) (*session.MySession, error) {
+	hmSession, err := session.GetMatchedSession(w, r)
+	if err != nil {
+		return nil, err
+	}
+	return hmSession, nil
+}
+
+func getLoginName(hmSession *session.MySession) string {
+	if hmSession == nil {
+		return ""
+	}
+	grantors, err := hmSession.Get(session.SESSION_GRANTORS_KEY)
+	if err != nil {
+		go_lib.LogErrorln("SessionGetError (field=%s): %s\n", session.SESSION_GRANTORS_KEY, err)
+		return ""
+	}
+	return grantors
+}
+
+func getPageRights(hmSession *session.MySession) map[string]string {
+	var pageRights map[string]string
+	if hmSession == nil {
+		return pageRights
+	}
+	groupName, err := hmSession.Get(session.SESSION_GROUP_KEY)
+	if err != nil {
+		go_lib.LogErrorln("SessionGetError (field=%s): %s\n", session.SESSION_GROUP_KEY, err)
+		return pageRights
+	}
+	userGroup, err := rights.GetUserGroup(groupName)
+	if err != nil {
+		go_lib.LogErrorln("GetUserGroupError (groupName=%s): %s\n", groupName, err)
+		return pageRights
+	}
+	if userGroup != nil {
+		pageRights = userGroup.Rights.PageRights
+	}
+	return pageRights
+}
+
+func GetSessionMap(w http.ResponseWriter, r *http.Request) map[string]string {
+	var sessionMap map[string]string
+	hmSession, err := GetSession(w, r)
+	if err != nil {
+		go_lib.LogErrorln("GetSessionError: %s\n", err)
+		return sessionMap
+	}
+	if hmSession != nil {
+		sessionMap, err = hmSession.GetAll()
+		if err != nil {
+			go_lib.LogErrorln("SessionGetAllError: %s\n", err)
+			return sessionMap
+		}
+	}
+	return sessionMap
 }
 
 func splitHostPort(requestHost string) (host string, port string) {

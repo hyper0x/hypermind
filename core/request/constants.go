@@ -7,7 +7,6 @@ const (
 	CN_NAME_KEY      string = "cnName"
 	EMAIL_KEY        string = "email"
 	MOBILE_PHONE_KEY string = "mobilePhone"
-	ROOT_USER_NAME          = "root"
 	AUTH_CODE               = "auth_code"
 )
 

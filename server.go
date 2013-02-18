@@ -19,37 +19,25 @@ import (
 
 var serverPort int = *flag.Int("port", 9091, "the server (http listen) port")
 
-func getSessionMap(w http.ResponseWriter, r *http.Request) (map[string]string, error) {
-	hmSession, err := session.GetMatchedSession(w, r)
-	if err != nil {
-		go_lib.LogErrorln("GetSessionErr:", err)
-		return nil, err
-	}
-	return hmSession.GetAll()
-}
-
 func welcome(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	go_lib.LogInfoln(request.GetRequestInfo(r))
-	sessionMap, err := getSessionMap(w, r)
-	loginName := ""
-	if err != nil {
-		go_lib.LogErrorln("GetSessionErr:", err)
-	} else {
-		loginName = sessionMap[session.SESSION_GRANTORS_KEY]
-	}
-	attrMap := request.GenerateBasicAttrMap(r, (len(loginName) > 0))
-	attrMap[request.LOGIN_NAME_KEY] = loginName
+	attrMap := request.GenerateBasicAttrMap(w, r)
 	currentPage := r.FormValue("page")
 	if len(currentPage) == 0 {
 		currentPage = request.HOME_PAGE
 	}
+	pageRightsTag := attrMap[currentPage]
+	if pageRightsTag != "true" {
+		currentPage = request.HOME_PAGE
+	}
 	t := template.New("welcome page")
 	t.Funcs(template.FuncMap{
-		"equal": request.SimpleEqual,
-		"match": request.MatchString,
+		"equal":   request.SimpleEqual,
+		"match":   request.MatchString,
+		"allTrue": request.AllTrue,
 	})
-	t, err = t.ParseFiles(request.GeneratePagePath(currentPage),
+	t, err := t.ParseFiles(request.GeneratePagePath(currentPage),
 		request.GeneratePagePath("header"),
 		request.GeneratePagePath("footer"),
 		request.GeneratePagePath("navbar"))
@@ -67,13 +55,8 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	sessionMap, err := getSessionMap(w, r)
-	loginName := ""
-	if err != nil {
-		go_lib.LogErrorln("GetSessionErr:", err)
-	} else {
-		loginName = sessionMap[session.SESSION_GRANTORS_KEY]
-	}
+	attrMap := request.GenerateBasicAttrMap(w, r)
+	loginName := attrMap[request.LOGIN_NAME_KEY]
 	go_lib.LogInfoln(request.GetRequestInfo(r))
 	auth_code := r.FormValue(request.AUTH_CODE)
 	go_lib.LogInfof("Getting CV by user '%s' with input '%s'...\n", loginName, auth_code)
@@ -104,20 +87,15 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 func login(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	go_lib.LogInfoln(request.GetRequestInfo(r))
-	sessionMap, err := getSessionMap(w, r)
-	loginName := ""
-	if err != nil {
-		go_lib.LogErrorln("GetSessionErr:", err)
-	} else {
-		loginName = sessionMap[session.SESSION_GRANTORS_KEY]
-	}
+	attrMap := request.GenerateBasicAttrMap(w, r)
+	loginName := attrMap[request.LOGIN_NAME_KEY]
 	if r.Method == "GET" {
 		tokenKey := request.GenerateTokenKey(loginName, r)
 		go_lib.LogInfoln("TokenKey:", tokenKey)
 		token := request.GenerateToken()
 		go_lib.LogInfo("Token:", token)
 		request.SetToken(tokenKey, token)
-		attrMap := request.GenerateBasicAttrMap(r, false)
+		attrMap := request.GenerateBasicAttrMap(w, r)
 		attrMap["token"] = token
 		t, err := template.ParseFiles(request.GeneratePagePath("login"))
 		if err != nil {
@@ -194,7 +172,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	go_lib.LogInfoln(request.GetRequestInfo(r))
 	if r.Method == "GET" {
-		attrMap := request.GenerateBasicAttrMap(r, false)
+		attrMap := request.GenerateBasicAttrMap(w, r)
 		encodedHint := r.FormValue("hint")
 		if len(encodedHint) > 0 {
 			hint := request.UrlDecoding(encodedHint)

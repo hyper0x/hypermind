@@ -11,5 +11,6 @@ const (
 const (
 	SESSION_KEY_PREFIX      = "hmsession-"
 	SESSION_GRANTORS_KEY    = "grantors"
+	SESSION_GROUP_KEY       = "group"
 	SESSION_COOKIE_SIGN_KEY = "cookie_sign"
 )

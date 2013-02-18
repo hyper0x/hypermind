@@ -2,8 +2,8 @@ package request
 
 import (
 	"fmt"
-	"regexp"
 	"go_lib"
+	"regexp"
 )
 
 func SimpleEqual(args ...interface{}) bool {
@@ -43,4 +43,18 @@ func MatchString(args ...interface{}) bool {
 		}
 	}
 	return true
+}
+
+func AllTrue(literals ...string) bool {
+	if len(literals) == 0 {
+		return false
+	}
+	result := true
+	for _, v := range literals {
+		if v != "true" && v != "y" {
+			result = false
+			break
+		}
+	}
+	return result
 }

@@ -17,13 +17,13 @@ func TestGroupRights(t *testing.T) {
 	rightsDict["1"] = "A"
 	rightsDict["2"] = "B"
 	rightsDict["3"] = "C"
-	groupRights := GroupRights{Dict: rightsDict}
+	groupRights := GroupRights{PageRights: rightsDict}
 	groupRightsLiterals, err := MarshalGroupRights(groupRights)
 	if err != nil {
 		t.Errorf("Error: Marshal Group Rights Error: %s\n", err)
 		t.FailNow()
 	}
-	expectGroupRightsLiterals := "{\"Dict\":{\"1\":\"A\",\"2\":\"B\",\"3\":\"C\"}}"
+	expectGroupRightsLiterals := "{\"PageRights\":{\"1\":\"A\",\"2\":\"B\",\"3\":\"C\"}}"
 	if groupRightsLiterals != expectGroupRightsLiterals {
 		t.Errorf("Fail: The group rights literals should be %s but %s. \n", expectGroupRightsLiterals, groupRightsLiterals)
 		t.FailNow()
@@ -36,8 +36,8 @@ func TestGroupRights(t *testing.T) {
 		t.Errorf("Error: Unmarshal Group Rights Error: %s\n", err)
 		t.FailNow()
 	}
-	groupRightsCopyLen := len(groupRightsCopy.Dict)
-	groupRightsLen := len(groupRights.Dict)
+	groupRightsCopyLen := len(groupRightsCopy.PageRights)
+	groupRightsLen := len(groupRights.PageRights)
 	if groupRightsCopyLen != groupRightsLen {
 		t.Errorf("Fail: The length of group rights dict copy should be %d but %d. \n\n", groupRightsLen, groupRightsCopyLen)
 		t.FailNow()
@@ -45,8 +45,8 @@ func TestGroupRights(t *testing.T) {
 	if debugTag {
 		t.Logf("The length of group rights literals copy is %d. \n", groupRightsCopyLen)
 	}
-	for k, v := range groupRightsCopy.Dict {
-		ev := groupRights.Dict[k]
+	for k, v := range groupRightsCopy.PageRights {
+		ev := groupRights.PageRights[k]
 		if len(v) == 0 || v != ev {
 			t.Errorf("Fail: The value of key '%s' in group rights copy should be %s but %s. \n\n", k, ev, v)
 			t.FailNow()
@@ -69,7 +69,7 @@ func TestUserGroup(t *testing.T) {
 	rightsDict["1"] = "A"
 	rightsDict["2"] = "B"
 	rightsDict["3"] = "C"
-	groupRights := GroupRights{Dict: rightsDict}
+	groupRights := GroupRights{PageRights: rightsDict}
 	groupName := "testing_group"
 	userGroup0 := &UserGroup{
 		Name:   groupName,
