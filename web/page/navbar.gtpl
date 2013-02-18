@@ -17,10 +17,10 @@
                     <li {{if equal .currentPage .meetingKanbanPage}}class="active"{{end}}><a href="/?page={{.meetingKanbanPage}}">Meeting Kanban</a></li>
                 {{end}}
                 {{if allTrue .project_hash_ring}}
-                    <li {{if match .currentPage "^project-.*"}}class="active"{{end}}><a href="/?page={{.projectHashRingPage}}">Projects</a></li>
+                    <li {{if match .currentPage "^project_.*"}}class="active"{{end}}><a href="/?page={{.projectHashRingPage}}">Projects</a></li>
                 {{end}}
                 {{if allTrue .about_me .about_website}}
-                    <li {{if match .currentPage "^about-.*"}}class="active"{{end}}><a href="/?page={{.aboutMePage}}">About</a></li>
+                    <li {{if match .currentPage "^about_.*"}}class="active"{{end}}><a href="/?page={{.aboutMePage}}">About</a></li>
                 {{end}} 
                 </ul>
             </div>
