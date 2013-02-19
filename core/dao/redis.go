@@ -82,10 +82,15 @@ func SetHashBatch(key string, fieldMap map[string]string) (bool, error) {
 func GetHash(key string, field string) (string, error) {
 	conn := RedisPool.Get()
 	defer conn.Close()
-	value, err := redis.String(conn.Do("HGET", key, field))
+	reply, err := conn.Do("HGET", key, field)
 	if err != nil {
 		return "", err
 	}
+	value := ""
+	if reply != nil {
+		value = fmt.Sprintf("%s", reply)
+	}
+
 	return value, nil
 }
 
@@ -130,6 +135,21 @@ func DelHashField(key string, field string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func FindKeys(pattern string) ([]string, error) {
+	conn := RedisPool.Get()
+	defer conn.Close()
+	keys := make([]string, 0)
+	values, err := redis.Values(conn.Do("KEYS", pattern))
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range values {
+		key := fmt.Sprintf("%s", v)
+		keys = append(keys, key)
+	}
+	return keys, nil
 }
 
 func SetExpires(key string, survivalSeconds uint64) (bool, error) {
