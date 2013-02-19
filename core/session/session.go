@@ -71,7 +71,7 @@ func (self *MySession) Initialize(
 	}
 	cookieMaxAge := survivalSeconds
 	if survivalSeconds <= 0 {
-		cookieMaxAge := -1
+		cookieMaxAge = -1
 	}
 	go_lib.LogInfof("Set session cookie (value=%s, grantors=%s, maxAge=%d)...\n", self.sessionId, grantors, cookieMaxAge)
 	result := hmSessionCookie.SetOne(self.w, SESSION_COOKIE_KEY, self.sessionId, cookieMaxAge)
