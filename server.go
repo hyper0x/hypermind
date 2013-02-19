@@ -17,7 +17,11 @@ import (
 	"time"
 )
 
-var serverPort int = *flag.Int("port", 9091, "the server (http listen) port")
+var serverPort int
+
+func init() {
+	flag.IntVar(&serverPort, "port", 9091, "the server (http listen) port")
+}
 
 func welcome(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
