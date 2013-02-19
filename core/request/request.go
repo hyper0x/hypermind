@@ -76,7 +76,6 @@ func GenerateBasicAttrMap(w http.ResponseWriter, r *http.Request) map[string]str
 		for p, r := range pageRights {
 			attrMap[p] = r
 		}
-
 		attrMap[LOGIN_NAME_KEY] = loginName
 	}
 	return attrMap

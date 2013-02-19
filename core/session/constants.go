@@ -4,13 +4,13 @@ package session
 const (
 	COOKIE_KEY_PREFIX  = "hm-"
 	SESSION_COOKIE_KEY = "sessionid"
-	COOKIE_MAX_AGE     = 60 * 60 * 2 // cookie live seconds
 )
 
 // session
 const (
-	SESSION_KEY_PREFIX      = "hmsession-"
-	SESSION_GRANTORS_KEY    = "grantors"
-	SESSION_GROUP_KEY       = "group"
-	SESSION_COOKIE_SIGN_KEY = "cookie_sign"
+	SESSION_SURVIVAL_SECONDS     = 60 * 60 * 24 // session live seconds
+	SESSION_KEY_PREFIX           = "hmsession-"
+	SESSION_GRANTORS_KEY         = "grantors"
+	SESSION_GROUP_KEY            = "group"
+	SESSION_SURVIVAL_SECONDS_KEY = "survival_seconds"
 )

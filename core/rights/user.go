@@ -30,7 +30,7 @@ func AddUser(user *User) error {
 	userInfoMap[REMARK_FIELD] = user.Remark
 	conn := dao.RedisPool.Get()
 	defer conn.Close()
-	err := dao.SetHashBatch(userKey, userInfoMap)
+	_, err := dao.SetHashBatch(userKey, userInfoMap)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,11 @@ func GetUser(loginName string) (*User, error) {
 		return nil, errors.New("The parameter named loginName is EMPTY!")
 	}
 	userKey := getUserKey(loginName)
-	userInfoMap, err := dao.GetHashAll(userKey)
+	return getUserByKey(userKey)
+}
+
+func getUserByKey(key string) (*User, error) {
+	userInfoMap, err := dao.GetHashAll(key)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +63,35 @@ func GetUser(loginName string) (*User, error) {
 	return user, nil
 }
 
+func FindUser(loginNamePattern string) ([]*User, error) {
+	if len(loginNamePattern) == 0 {
+		return nil, errors.New("The parameter named loginNamePattern is EMPTY!")
+	}
+	userKeyPattern := getUserKey(loginNamePattern)
+	userKeys, err := dao.FindKeys(userKeyPattern)
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*User, 0)
+	if len(userKeys) == 0 {
+		return users, nil
+	}
+	for _, k := range userKeys {
+		user, err := getUserByKey(k)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
 func DeleteUser(loginName string) error {
 	if len(loginName) == 0 {
 		return errors.New("The parameter named loginName is EMPTY!")
 	}
 	userKey := getUserKey(loginName)
-	err := dao.DelKey(userKey)
+	_, err := dao.DelKey(userKey)
 	if err != nil {
 		return err
 	}

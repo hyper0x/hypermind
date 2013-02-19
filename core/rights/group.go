@@ -6,6 +6,7 @@ import (
 	"go_lib"
 	"hypermind/core/base"
 	"hypermind/core/dao"
+	"runtime/debug"
 )
 
 type GroupRights struct {
@@ -107,7 +108,7 @@ func AddUserGroup(userGroup *UserGroup) error {
 	}
 	conn := dao.RedisPool.Get()
 	defer conn.Close()
-	err = dao.SetHash(dao.USER_GROUP_KEY, userGroup.Name, groupRightsLiterals)
+	_, err = dao.SetHash(dao.USER_GROUP_KEY, userGroup.Name, groupRightsLiterals)
 	if err != nil {
 		return err
 	}
@@ -116,6 +117,7 @@ func AddUserGroup(userGroup *UserGroup) error {
 
 func GetUserGroup(groupName string) (*UserGroup, error) {
 	if len(groupName) == 0 {
+		debug.PrintStack()
 		return nil, errors.New("The parameter named groupName is EMPTY!")
 	}
 	groupRightsLiterals, err := dao.GetHash(dao.USER_GROUP_KEY, groupName)
@@ -139,7 +141,7 @@ func DeleteUserGroup(groupName string) error {
 	if len(groupName) == 0 {
 		return errors.New("The parameter named groupName is EMPTY!")
 	}
-	err := dao.DelHashField(dao.USER_GROUP_KEY, groupName)
+	_, err := dao.DelHashField(dao.USER_GROUP_KEY, groupName)
 	if err != nil {
 		return err
 	}

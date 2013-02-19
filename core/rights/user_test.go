@@ -1,6 +1,8 @@
 package rights
 
 import (
+	"bytes"
+	"fmt"
 	"runtime/debug"
 	"testing"
 )
@@ -59,6 +61,40 @@ func TestUser(t *testing.T) {
 	if !pass {
 		t.Errorf("Fail: The password of user (loginName=%s) should equals %s. \n", loginName, password)
 		t.FailNow()
+	}
+	loginNamePattern := loginName + "*"
+	users, err := FindUser(loginNamePattern)
+	if err != nil {
+		t.Errorf("Error: Find User Error: %s\n", err)
+		t.FailNow()
+	}
+	expectUsersLen := 1
+	usersLen := len(users)
+	if usersLen != expectUsersLen {
+		t.Errorf("Fail: The length of user list (pattern=%s) should be %d but %v. (negligible password)\n", loginNamePattern, expectUsersLen, usersLen)
+		t.FailNow()
+	}
+	user2 := users[0]
+	if user2.LoginName != loginName ||
+		user2.Password != encryptPassword(password) ||
+		user2.Email != email ||
+		user2.MobilePhone != mobilePhone ||
+		user2.Group != group ||
+		user2.Remark != remark {
+		t.Errorf("Fail: The user should be %v but %v. (negligible password)\n", user0, user2)
+		t.FailNow()
+	}
+	if debugTag {
+		var buffer bytes.Buffer
+		buffer.WriteString("[")
+		for i, u := range users {
+			buffer.WriteString(fmt.Sprintf("%s", u))
+			if i+1 < usersLen {
+				buffer.WriteString(", ")
+			}
+		}
+		buffer.WriteString("]")
+		t.Logf("Find user with pattern '%s': %s\n", loginNamePattern, buffer.String())
 	}
 	err = DeleteUser(loginName)
 	if err != nil {

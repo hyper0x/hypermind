@@ -27,7 +27,11 @@ type MySession struct {
 
 func (self *MySession) Initialize(
 	grantors string,
-	cookieSign int, // cookieSign: '<0'-Don't set cookie; '0'-Set temporary cookie, '>0'- Set long term cookie
+	// survivalSeconds: 
+	//  '<0'- Don't set/Delete cookie; 
+	//  '0' - Set temporary cookie; 
+	//  '>0'- Set long term cookie according to this value & Set session expires
+	survivalSeconds int,
 	w http.ResponseWriter,
 	r *http.Request) error {
 	if len(grantors) == 0 {
@@ -47,28 +51,41 @@ func (self *MySession) Initialize(
 	self.sessionId = generateSessionId(grantors, r)
 	self.key = generateSessionKey(self.sessionId)
 	go_lib.LogInfof("Initialize session (key=%s, grantors=%s)...\n", self.key, grantors)
-	err := dao.SetHash(self.key, SESSION_GRANTORS_KEY, grantors)
+	exists, err := dao.Exists(self.key)
 	if err != nil {
 		return err
 	}
-	err = dao.SetHash(self.key, SESSION_COOKIE_SIGN_KEY, strconv.FormatInt(int64(cookieSign), 10))
+	if exists {
+		_, err = dao.DelKey(self.key)
+		if err != nil {
+			return err
+		}
+	}
+	_, err = dao.SetHash(self.key, SESSION_GRANTORS_KEY, grantors)
 	if err != nil {
 		return err
 	}
-	cookieMaxAge := -1
-	if cookieSign > 0 {
-		cookieMaxAge = COOKIE_MAX_AGE
-	} else if cookieSign == 0 {
+	_, err = dao.SetHash(self.key, SESSION_SURVIVAL_SECONDS_KEY, strconv.FormatInt(int64(survivalSeconds), 10))
+	if err != nil {
+		return err
+	}
+	cookieMaxAge := survivalSeconds
+	if survivalSeconds <= 0 {
 		cookieMaxAge = -1
-	} else {
-		cookieMaxAge = 0
 	}
 	go_lib.LogInfof("Set session cookie (value=%s, grantors=%s, maxAge=%d)...\n", self.sessionId, grantors, cookieMaxAge)
 	result := hmSessionCookie.SetOne(self.w, SESSION_COOKIE_KEY, self.sessionId, cookieMaxAge)
 	if result {
-		go_lib.LogInfof("Session cookie Setting (value=%s, grantors=%s, maxAge=%d) is successful.\n", self.sessionId, grantors, cookieMaxAge)
+		go_lib.LogInfof("Session cookie setting (value=%s, grantors=%s, maxAge=%d) is successful.\n", self.sessionId, grantors, cookieMaxAge)
 	} else {
-		go_lib.LogWarnf("Session cookie Setting (value=%s, grantors=%s, maxAge=%d) is failing!\n", self.sessionId, grantors, cookieMaxAge)
+		go_lib.LogWarnf("Session cookie setting (value=%s, grantors=%s, maxAge=%d) is failing!\n", self.sessionId, grantors, cookieMaxAge)
+	}
+	if survivalSeconds > 0 {
+		done, err := dao.SetExpires(self.key, uint64(survivalSeconds))
+		if err != nil || !done {
+			warningMsg := fmt.Sprintf("Setting session expires failed! (key=%s, survivalSeconds=%d, error=%s)\n", self.key, survivalSeconds, err)
+			go_lib.LogWarnln(warningMsg)
+		}
 	}
 	return nil
 }
@@ -78,13 +95,14 @@ func (self *MySession) Destroy() (bool, error) {
 		errorMsg := fmt.Sprintln("Uninitialized yet!")
 		return false, errors.New(errorMsg)
 	}
-	go_lib.LogInfof("Destroy session (key=%s)...\n", self.key)
-	err := dao.DelKey(self.key)
+	go_lib.LogInfof("Destroy session (key=%s)... \n", self.key)
+	_, err := dao.DelKey(self.key)
 	if err != nil {
 		return false, err
 	}
 	go_lib.LogInfof("Delete session cookie (value=%s)...\n", self.sessionId)
 	hmSessionCookie.Delete(SESSION_COOKIE_KEY, self.w)
+	go_lib.LogInfof("The session (key=%s) is destroyed. \n", self.key)
 	return true, nil
 }
 
@@ -93,7 +111,7 @@ func (self *MySession) Set(name string, value string) error {
 		errorMsg := fmt.Sprintln("The parameter named name is EMPTY!")
 		return errors.New(errorMsg)
 	}
-	err := dao.SetHash(self.key, name, value)
+	_, err := dao.SetHash(self.key, name, value)
 	return err
 }
 
@@ -135,7 +153,7 @@ func (self *MySession) Delete(name string) error {
 		errorMsg := fmt.Sprintln("The parameter named name is EMPTY!")
 		return errors.New(errorMsg)
 	}
-	err := dao.DelHashField(self.key, name)
+	_, err := dao.DelHashField(self.key, name)
 	if err != nil {
 		return err
 	}
@@ -173,7 +191,11 @@ func GetMatchedSession(w http.ResponseWriter, r *http.Request) (*MySession, erro
 		return nil, nil
 	}
 	sessionkey := generateSessionKey(sessionId)
-	if !dao.Exists(sessionkey) {
+	exists, err := dao.Exists(sessionkey)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
 		warningMsg := fmt.Sprintf("Not found matched session! No session in storage! (sessionId=%s, sessionKey=%s)", sessionId, sessionkey)
 		go_lib.LogWarnln(warningMsg)
 		return nil, nil
@@ -183,27 +205,44 @@ func GetMatchedSession(w http.ResponseWriter, r *http.Request) (*MySession, erro
 		return nil, err
 	}
 	if len(grantors) == 0 {
-		warningMsg := fmt.Sprintf("Not found grantor from session (sessionKey=%s, field=%s)!\n", sessionkey, SESSION_GRANTORS_KEY)
+		warningMsg := fmt.Sprintf("Not found grantor from session (sessionKey=%s, attribute=%s)!\n", sessionkey, SESSION_GRANTORS_KEY)
 		go_lib.LogWarnln(warningMsg)
 		return nil, nil
 	}
-	signLiterals, err := dao.GetHash(sessionkey, SESSION_COOKIE_SIGN_KEY)
+	groupName, err := dao.GetHash(sessionkey, SESSION_GROUP_KEY)
 	if err != nil {
 		return nil, err
 	}
-	var cookieSign int64
-	if len(signLiterals) == 0 {
-		warningMsg := fmt.Sprintf("Not found session cookie sign from session. Use default value '0'. (sessionKey=%s, field=%s)!\n", sessionkey, SESSION_COOKIE_SIGN_KEY)
+	if len(groupName) == 0 {
+		warningMsg := fmt.Sprintf("Not found group name from session (sessionKey=%s, attribute=%s)!\n", sessionkey, SESSION_GROUP_KEY)
 		go_lib.LogWarnln(warningMsg)
-		cookieSign = 0
-	} else {
-		cookieSign, err = strconv.ParseInt(signLiterals, 10, 64)
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
+	servivalSecondsLiterals, err := dao.GetHash(sessionkey, SESSION_SURVIVAL_SECONDS_KEY)
+	if err != nil {
+		return nil, err
+	}
+	if len(servivalSecondsLiterals) == 0 {
+		warningMsg := fmt.Sprintf("Not found session servival seconds. Use default value '0'. (sessionKey=%s, attribute=%s)!\n", sessionkey, SESSION_SURVIVAL_SECONDS_KEY)
+		go_lib.LogWarnln(warningMsg)
+		return nil, err
+	}
+	hmSession := &MySession{key: sessionkey, sessionId: sessionId, w: w, r: r}
+	return hmSession, nil
+}
+
+func newSession(grantors string, servivalSeconds int, w http.ResponseWriter, r *http.Request) (*MySession, error) {
 	hmSession := &MySession{}
-	err = hmSession.Initialize(grantors, int(cookieSign), w, r)
+	err := hmSession.Initialize(grantors, servivalSeconds, w, r)
+	if err != nil {
+		return nil, err
+	}
+	user, err := rights.GetUser(grantors)
+	if err != nil {
+		return nil, err
+	}
+	go_lib.LogInfof("Set session core attribute '%s' to value '%s' for grantors '%s'. (key=%s)\n", SESSION_GROUP_KEY, user.Group, grantors, hmSession.Key())
+	err = hmSession.Set(SESSION_GROUP_KEY, user.Group)
 	if err != nil {
 		return nil, err
 	}
@@ -211,27 +250,9 @@ func GetMatchedSession(w http.ResponseWriter, r *http.Request) (*MySession, erro
 }
 
 func NewSession(grantors string, longTerm bool, w http.ResponseWriter, r *http.Request) (*MySession, error) {
-	hmSession := &MySession{}
-	cookieSign := 0
+	servivalSeconds := -1
 	if longTerm {
-		cookieSign = 1
+		servivalSeconds = SESSION_SURVIVAL_SECONDS
 	}
-	err := hmSession.Initialize(grantors, cookieSign, w, r)
-	if err != nil {
-		return nil, err
-	}
-
-	user, err := rights.GetUser(grantors)
-	if err != nil {
-		return nil, err
-	}
-	contentMap := make(map[string]string)
-	contentMap[SESSION_GRANTORS_KEY] = grantors
-	contentMap[SESSION_COOKIE_SIGN_KEY] = strconv.FormatInt(int64(cookieSign), 10)
-	contentMap[SESSION_GROUP_KEY] = user.Group
-	err = hmSession.SetBatch(contentMap)
-	if err != nil {
-		return nil, err
-	}
-	return hmSession, nil
+	return newSession(grantors, servivalSeconds, w, r)
 }

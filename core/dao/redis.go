@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"errors"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"go_lib"
@@ -53,45 +52,45 @@ func init() {
 	}
 }
 
-func SetHash(key string, field string, value string) error {
+func SetHash(key string, field string, value string) (bool, error) {
 	conn := RedisPool.Get()
 	defer conn.Close()
 	n, err := redis.Int(conn.Do("HSET", key, field, value))
 	if err != nil {
-		return err
+		return false, err
 	}
-	if n != 0 && n != 1 {
-		errorMsg := fmt.Sprintf("Redis operation failed! (cmd='HSET %v %v %v', n=%d)", key, field, value, n)
-		return errors.New(errorMsg)
+	if n == 0 || n == 1 {
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
-func SetHashBatch(key string, fieldMap map[string]string) error {
+func SetHashBatch(key string, fieldMap map[string]string) (bool, error) {
 	conn := RedisPool.Get()
 	defer conn.Close()
+	result := false
 	for f, v := range fieldMap {
-		err := SetHash(key, f, v)
+		currentResult, err := SetHash(key, f, v)
+		result = result && currentResult
 		if err != nil {
-			return err
+			return result, err
 		}
 	}
-	return nil
+	return result, nil
 }
 
 func GetHash(key string, field string) (string, error) {
-	if !Exists(key) {
-		return "", nil
-	}
-	if !HashFieldExists(key, field) {
-		return "", nil
-	}
 	conn := RedisPool.Get()
 	defer conn.Close()
-	value, err := redis.String(conn.Do("HGET", key, field))
+	reply, err := conn.Do("HGET", key, field)
 	if err != nil {
 		return "", err
 	}
+	value := ""
+	if reply != nil {
+		value = fmt.Sprintf("%s", reply)
+	}
+
 	return value, nil
 }
 
@@ -112,64 +111,70 @@ func GetHashAll(key string) (map[string]string, error) {
 	return result, nil
 }
 
-func DelKey(key string) error {
-	if !Exists(key) {
-		return nil
-	}
+func DelKey(key string) (bool, error) {
 	conn := RedisPool.Get()
 	defer conn.Close()
 	n, err := redis.Int(conn.Do("DEL", key))
 	if err != nil {
-		return err
+		return false, err
 	}
-	if n != 0 && n != 1 {
-		errorMsg := fmt.Sprintf("Redis operation failed! (cmd='DEL %v', n=%d)", key, n)
-		return errors.New(errorMsg)
+	if n > 0 {
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
-func DelHashField(key string, field string) error {
-	if !Exists(key) {
-		return nil
-	}
+func DelHashField(key string, field string) (bool, error) {
 	conn := RedisPool.Get()
 	defer conn.Close()
 	n, err := redis.Int(conn.Do("HDEL", key, field))
 	if err != nil {
-		return err
+		return false, err
 	}
-	if n != 0 && n != 1 {
-		errorMsg := fmt.Sprintf("Redis operation failed! (cmd='HDEL %v %v', n=%d)", key, field, n)
-		return errors.New(errorMsg)
+	if n > 0 {
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
-func Exists(key string) bool {
+func FindKeys(pattern string) ([]string, error) {
+	conn := RedisPool.Get()
+	defer conn.Close()
+	keys := make([]string, 0)
+	values, err := redis.Values(conn.Do("KEYS", pattern))
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range values {
+		key := fmt.Sprintf("%s", v)
+		keys = append(keys, key)
+	}
+	return keys, nil
+}
+
+func SetExpires(key string, survivalSeconds uint64) (bool, error) {
+	conn := RedisPool.Get()
+	defer conn.Close()
+	result, err := redis.Int(conn.Do("EXPIRE", key, survivalSeconds))
+	if err != nil {
+		return false, err
+	}
+	if result == 1 {
+		return true, nil
+	}
+	return false, nil
+}
+
+func Exists(key string) (bool, error) {
 	conn := RedisPool.Get()
 	defer conn.Close()
 	exists, err := redis.Bool(conn.Do("EXISTS", key))
-	if err != nil {
-		go_lib.LogErrorf("JudgeKeyExistenceError (key=%s): %s\n ", key, err)
-		return false
-	}
-	if !exists {
-		go_lib.LogWarnf("The key '%s' is NONEXISTENCE.\n", key)
-	}
-	return exists
+	return exists, err
 }
 
-func HashFieldExists(key string, field string) bool {
+func HashFieldExists(key string, field string) (bool, error) {
 	conn := RedisPool.Get()
+	defer conn.Close()
 	fieldExists, err := redis.Bool(conn.Do("HEXISTS", key, field))
-	if err != nil {
-		go_lib.LogErrorf("JudgeHashFieldExistenceError (key=%s, field=%s): %s\n ", key, field, err)
-		return false
-	}
-	if !fieldExists {
-		go_lib.LogWarnf("The field '%s' in hash key '%s' is NONEXISTENCE.\n", field, key)
-		return false
-	}
-	return fieldExists
+	return fieldExists, err
 }

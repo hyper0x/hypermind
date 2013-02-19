@@ -17,7 +17,11 @@ import (
 	"time"
 )
 
-var serverPort int = *flag.Int("port", 9091, "the server (http listen) port")
+var serverPort int
+
+func init() {
+	flag.IntVar(&serverPort, "port", 9091, "the server (http listen) port")
+}
 
 func welcome(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -160,7 +164,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			go_lib.LogErrorln("DestroySessionErr:", err)
 		} else {
-			go_lib.LogInfoln("Logout: User '%s' logout. (result=%v)\n", loginName, done)
+			go_lib.LogInfof("Logout: User '%s' logout. (result=%v)\n", loginName, done)
 		}
 	} else {
 		go_lib.LogInfoln("Logout: Current visitor has yet login.\n")
