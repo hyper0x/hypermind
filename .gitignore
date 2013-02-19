@@ -5,3 +5,5 @@ out**/*
 pkg**/*
 logs**/*
 resume.html
+hypermind
+*.exe
