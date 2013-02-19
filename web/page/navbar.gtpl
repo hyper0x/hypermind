@@ -25,7 +25,7 @@
                 </ul>
             </div>
             <ul class="nav pull-right">
-                {{if .validLogin}}
+                {{if .loginName}}
                 <li><a href="#">Hi, {{.loginName}}</a></li>
                 <li class="divider-vertical"></li>
                 <a class="btn navbar-form pull-right" href="http://{{.serverAddr}}:{{.serverPort}}/logout">Sign Out</a></p>
