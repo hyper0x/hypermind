@@ -107,7 +107,7 @@ func AddUserGroup(userGroup *UserGroup) error {
 	}
 	conn := dao.RedisPool.Get()
 	defer conn.Close()
-	err = dao.SetHash(dao.USER_GROUP_KEY, userGroup.Name, groupRightsLiterals)
+	_, err = dao.SetHash(dao.USER_GROUP_KEY, userGroup.Name, groupRightsLiterals)
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func DeleteUserGroup(groupName string) error {
 	if len(groupName) == 0 {
 		return errors.New("The parameter named groupName is EMPTY!")
 	}
-	err := dao.DelHashField(dao.USER_GROUP_KEY, groupName)
+	_, err := dao.DelHashField(dao.USER_GROUP_KEY, groupName)
 	if err != nil {
 		return err
 	}

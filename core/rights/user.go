@@ -30,7 +30,7 @@ func AddUser(user *User) error {
 	userInfoMap[REMARK_FIELD] = user.Remark
 	conn := dao.RedisPool.Get()
 	defer conn.Close()
-	err := dao.SetHashBatch(userKey, userInfoMap)
+	_, err := dao.SetHashBatch(userKey, userInfoMap)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func DeleteUser(loginName string) error {
 		return errors.New("The parameter named loginName is EMPTY!")
 	}
 	userKey := getUserKey(loginName)
-	err := dao.DelKey(userKey)
+	_, err := dao.DelKey(userKey)
 	if err != nil {
 		return err
 	}
