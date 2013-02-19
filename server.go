@@ -123,6 +123,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 				validToken = true
 			}
 		}
+		if !validToken {
+			go_lib.LogWarnf("Invalid token '%s' ! Ignore the login request.", token)
+			r.Method = "GET"
+			http.Redirect(w, r, r.URL.Path, http.StatusFound)
+			return
+		}
 		loginName = template.HTMLEscapeString(r.Form.Get(request.LOGIN_NAME_KEY))
 		go_lib.LogInfoln("login - loginName:", loginName)
 		password := template.HTMLEscapeString(r.Form.Get(request.PASSWORD_KEY))
@@ -135,12 +141,10 @@ func login(w http.ResponseWriter, r *http.Request) {
 			go_lib.LogErrorf("VerifyUserError (loginName=%s): %s\n", loginName, err)
 		} else {
 			if validLogin {
-				if validToken {
-					longTerm := len(rememberMe) == 0 || rememberMe != "y"
-					_, err = session.NewSession(loginName, longTerm, w, r)
-					if err != nil {
-						go_lib.LogErrorf("SetSessionError (loginName=%s): %s\n", loginName, err)
-					}
+				longTerm := len(rememberMe) == 0 || rememberMe != "y"
+				_, err = session.NewSession(loginName, longTerm, w, r)
+				if err != nil {
+					go_lib.LogErrorf("SetSessionError (loginName=%s): %s\n", loginName, err)
 				}
 			}
 		}

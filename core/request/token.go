@@ -1,14 +1,14 @@
 package request
 
 import (
-	"net/http"
-	"net/url"
-	"time"
-	"strconv"
-	"fmt"
-	"io"
 	"bytes"
 	"crypto/md5"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strconv"
+	"time"
 )
 
 var userTokenMap map[string]string
@@ -43,7 +43,7 @@ func GetToken(loginName string) (token string) {
 	return
 }
 
-func SetToken(loginName string, token string) (bool) {
+func SetToken(loginName string, token string) bool {
 	if len(loginName) == 0 || len(token) == 0 {
 		return false
 	}
