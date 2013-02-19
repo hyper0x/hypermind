@@ -95,13 +95,14 @@ func (self *MySession) Destroy() (bool, error) {
 		errorMsg := fmt.Sprintln("Uninitialized yet!")
 		return false, errors.New(errorMsg)
 	}
-	go_lib.LogInfof("Destroy session (key=%s)...\n", self.key)
+	go_lib.LogInfof("Destroy session (key=%s)... \n", self.key)
 	_, err := dao.DelKey(self.key)
 	if err != nil {
 		return false, err
 	}
 	go_lib.LogInfof("Delete session cookie (value=%s)...\n", self.sessionId)
 	hmSessionCookie.Delete(SESSION_COOKIE_KEY, self.w)
+	go_lib.LogInfof("The session (key=%s) is destroyed. \n", self.key)
 	return true, nil
 }
 
@@ -204,39 +205,34 @@ func GetMatchedSession(w http.ResponseWriter, r *http.Request) (*MySession, erro
 		return nil, err
 	}
 	if len(grantors) == 0 {
-		warningMsg := fmt.Sprintf("Not found grantor from session (sessionKey=%s, field=%s)!\n", sessionkey, SESSION_GRANTORS_KEY)
+		warningMsg := fmt.Sprintf("Not found grantor from session (sessionKey=%s, attribute=%s)!\n", sessionkey, SESSION_GRANTORS_KEY)
 		go_lib.LogWarnln(warningMsg)
 		return nil, nil
+	}
+	groupName, err := dao.GetHash(sessionkey, SESSION_GROUP_KEY)
+	if err != nil {
+		return nil, err
+	}
+	if len(groupName) == 0 {
+		warningMsg := fmt.Sprintf("Not found group name from session (sessionKey=%s, attribute=%s)!\n", sessionkey, SESSION_GROUP_KEY)
+		go_lib.LogWarnln(warningMsg)
+		return nil, err
 	}
 	servivalSecondsLiterals, err := dao.GetHash(sessionkey, SESSION_SURVIVAL_SECONDS_KEY)
 	if err != nil {
 		return nil, err
 	}
-	var servivalSeconds int64
 	if len(servivalSecondsLiterals) == 0 {
-		warningMsg := fmt.Sprintf("Not found session servival seconds. Use default value '0'. (sessionKey=%s, field=%s)!\n", sessionkey, SESSION_SURVIVAL_SECONDS_KEY)
+		warningMsg := fmt.Sprintf("Not found session servival seconds. Use default value '0'. (sessionKey=%s, attribute=%s)!\n", sessionkey, SESSION_SURVIVAL_SECONDS_KEY)
 		go_lib.LogWarnln(warningMsg)
-		servivalSeconds = 0
-	} else {
-		servivalSeconds, err = strconv.ParseInt(servivalSecondsLiterals, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-	}
-	hmSession := &MySession{}
-	err = hmSession.Initialize(grantors, int(servivalSeconds), w, r)
-	if err != nil {
 		return nil, err
 	}
+	hmSession := &MySession{key: sessionkey, sessionId: sessionId, w: w, r: r}
 	return hmSession, nil
 }
 
-func NewSession(grantors string, longTerm bool, w http.ResponseWriter, r *http.Request) (*MySession, error) {
+func newSession(grantors string, servivalSeconds int, w http.ResponseWriter, r *http.Request) (*MySession, error) {
 	hmSession := &MySession{}
-	servivalSeconds := -1
-	if longTerm {
-		servivalSeconds = SESSION_SURVIVAL_SECONDS
-	}
 	err := hmSession.Initialize(grantors, servivalSeconds, w, r)
 	if err != nil {
 		return nil, err
@@ -245,9 +241,18 @@ func NewSession(grantors string, longTerm bool, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return nil, err
 	}
+	go_lib.LogInfof("Set session core attribute '%s' to value '%s' for grantors '%s'. (key=%s)\n", SESSION_GROUP_KEY, user.Group, grantors, hmSession.Key())
 	err = hmSession.Set(SESSION_GROUP_KEY, user.Group)
 	if err != nil {
 		return nil, err
 	}
 	return hmSession, nil
+}
+
+func NewSession(grantors string, longTerm bool, w http.ResponseWriter, r *http.Request) (*MySession, error) {
+	servivalSeconds := -1
+	if longTerm {
+		servivalSeconds = SESSION_SURVIVAL_SECONDS
+	}
+	return newSession(grantors, servivalSeconds, w, r)
 }

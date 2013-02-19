@@ -6,6 +6,7 @@ import (
 	"go_lib"
 	"hypermind/core/base"
 	"hypermind/core/dao"
+	"runtime/debug"
 )
 
 type GroupRights struct {
@@ -116,6 +117,7 @@ func AddUserGroup(userGroup *UserGroup) error {
 
 func GetUserGroup(groupName string) (*UserGroup, error) {
 	if len(groupName) == 0 {
+		debug.PrintStack()
 		return nil, errors.New("The parameter named groupName is EMPTY!")
 	}
 	groupRightsLiterals, err := dao.GetHash(dao.USER_GROUP_KEY, groupName)
