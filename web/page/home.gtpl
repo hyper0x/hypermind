@@ -20,10 +20,13 @@
       <h2>Welcome to Hypermind!</h2>
       <p>
         The web site is mainly in order to provide more convenience to myself (or people who have same needs with me).
-        The function including meeting kanban etc.
+        <br>
+        You can find out some open source projects create by me in <a href="/?page={{.projectHashRingPage}}">here</a>.
+        <br>
+        If you would know the author of this website, please try to click <a href="/?page={{.aboutMePage}}">here</a>.
       </p>
       <p>
-        <a class="btn btn-primary btn-large" href="/?page={{.aboutWebsitePage}}">Detail »</a>
+        
       </p>
     </div>
   </div>

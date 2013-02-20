@@ -31,7 +31,7 @@
         <div class="span10">
             <div class="hero-unit">
                 <p>
-                    This is a experimental website. It constructed by
+                    This website constructed by
                     <a class="btn btn-small" href="http://golang.org">Golang</a>
                     &
                     <a class="btn btn-small" href="http://twitter.github.com/bootstrap/">Bootstrap</a>
@@ -40,8 +40,7 @@
                     .
                 </p>
                 <p>
-                    The Web site source code in <a href="https://github.com/hyper-carrot/hypermind">here</a>
-                    .
+                    <a href="https://github.com/hyper-carrot/hypermind" class="btn btn-primary">Source code</a>
                 </p>
             </div>
         </div>

@@ -47,7 +47,7 @@
                 <p>
                     <label><h3>CV Authorization Code</h3></label>
                     <input id="cv_auth_code"type="text" class="input-medium search-query" placeholder="Please inquire with me.">
-                    <button id="cv_auth_code_submit" type="submit" class="btn">Submit</button>
+                    <button id="cv_auth_code_submit" type="submit" class="btn btn-primary">Submit</button>
                 </p>
             </div>
         </div>
