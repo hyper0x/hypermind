@@ -1,4 +1,4 @@
-package dao
+package request
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"go_lib"
+	"hypermind/core/dao"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -32,7 +33,7 @@ func VerifyAuthCode(authCode string) (bool, error) {
 				}
 			}
 			if len(newAuthCode) > 0 {
-				conn := RedisPool.Get()
+				conn := dao.RedisPool.Get()
 				defer conn.Close()
 				err = pushAuthCode(newAuthCode, conn)
 				if err != nil {
@@ -45,9 +46,9 @@ func VerifyAuthCode(authCode string) (bool, error) {
 }
 
 func GetCurrentAuthCode() (string, error) {
-	conn := RedisPool.Get()
+	conn := dao.RedisPool.Get()
 	defer conn.Close()
-	values, err := redis.Values(conn.Do("LRANGE", AUTH_CODE_KEY, 0, 0))
+	values, err := redis.Values(conn.Do("LRANGE", dao.AUTH_CODE_KEY, 0, 0))
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +75,7 @@ func GetCurrentAuthCode() (string, error) {
 }
 
 func GetAndNewAuthCode() (string, error) {
-	conn := RedisPool.Get()
+	conn := dao.RedisPool.Get()
 	defer conn.Close()
 	newAuthCode := generateAuthCode()
 	go_lib.LogInfof("New Auth Code: %s\n", newAuthCode)
@@ -86,12 +87,12 @@ func GetAndNewAuthCode() (string, error) {
 }
 
 func pushAuthCode(code string, conn redis.Conn) error {
-	n, err := redis.Int(conn.Do("LPUSH", AUTH_CODE_KEY, code))
+	n, err := redis.Int(conn.Do("LPUSH", dao.AUTH_CODE_KEY, code))
 	if err != nil {
 		return err
 	}
 	if n < 0 {
-		errorMsg := fmt.Sprintf("Redis operation failed! (cmd='LPUSH %v %v', n=%d)", AUTH_CODE_KEY, code, n)
+		errorMsg := fmt.Sprintf("Redis operation failed! (cmd='LPUSH %v %v', n=%d)", dao.AUTH_CODE_KEY, code, n)
 		return errors.New(errorMsg)
 	}
 	return nil

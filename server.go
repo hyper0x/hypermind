@@ -7,7 +7,6 @@ import (
 	"go_lib"
 	"html/template"
 	"hypermind/core/base"
-	"hypermind/core/dao"
 	"hypermind/core/request"
 	"hypermind/core/rights"
 	"hypermind/core/session"
@@ -64,7 +63,7 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 	go_lib.LogInfoln(request.GetRequestInfo(r))
 	auth_code := r.FormValue(request.AUTH_CODE)
 	go_lib.LogInfof("Getting CV by user '%s' with input '%s'...\n", loginName, auth_code)
-	pass, err := dao.VerifyAuthCode(auth_code)
+	pass, err := request.VerifyAuthCode(auth_code)
 	if err != nil {
 		go_lib.LogErrorf("Occur error when verify auth code: %s\n", err)
 		// w.WriteHeader(500)
