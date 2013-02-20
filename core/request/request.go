@@ -223,3 +223,31 @@ func UrlDecoding(s string) string {
 	res.ReadFrom(decoder)
 	return res.String()
 }
+
+func AppendParameter(urlPath string, parameters map[string]string) string {
+	if len(urlPath) == 0 || len(parameters) == 0 {
+		return urlPath
+	}
+	var newParameterBuffer bytes.Buffer
+	for k, v := range parameters {
+		if newParameterBuffer.Len() > 0 {
+			newParameterBuffer.WriteString("&")
+		}
+		newParameterBuffer.WriteString(k)
+		newParameterBuffer.WriteString("=")
+		newParameterBuffer.WriteString(url.QueryEscape(v))
+	}
+	prefix := "?"
+	qmIndex := strings.LastIndex(urlPath, "?")
+	if qmIndex > 0 {
+		pcIndex := strings.LastIndex(urlPath[qmIndex:], "=")
+		if pcIndex > 0 {
+			prefix = "&"
+		}
+	}
+	var newUrlPathBuffer bytes.Buffer
+	newUrlPathBuffer.WriteString(urlPath)
+	newUrlPathBuffer.WriteString(prefix)
+	newUrlPathBuffer.WriteString(newParameterBuffer.String())
+	return newUrlPathBuffer.String()
+}

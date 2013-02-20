@@ -2,10 +2,12 @@ package request
 
 // request parameter
 const (
-	LOGIN_NAME_KEY   string = "loginName"
-	PASSWORD_KEY     string = "password"
-	CN_NAME_KEY      string = "cnName"
-	EMAIL_KEY        string = "email"
-	MOBILE_PHONE_KEY string = "mobilePhone"
-	AUTH_CODE               = "auth_code"
+	LOGIN_NAME_KEY   = "loginName"
+	PASSWORD_KEY     = "password"
+	CN_NAME_KEY      = "cnName"
+	EMAIL_KEY        = "email"
+	MOBILE_PHONE_KEY = "mobilePhone"
+	AUTH_CODE        = "auth_code"
+	HINT_KEY         = "hint"
+	TOKEN_KEY        = "token"
 )

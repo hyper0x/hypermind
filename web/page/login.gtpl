@@ -57,13 +57,17 @@
     <div class="container">
       <form class="form-signin" action="http://{{.serverAddr}}:{{.serverPort}}/login" method="post">
         <h2 class="form-signin-heading">Please sign in</h2>
-        <input type="text" name="loginName" class="input-block-level" placeholder="Email address">
+        {{if .hint}}
+        <i class="icon-warning-sign"></i><span class>{{.hint}}</span>
+        {{end}}
+        <input type="text" name="loginName" class="input-block-level" placeholder="Login name">
         <input type="password" name="password" class="input-block-level" placeholder="Password">
         <input type="hidden" name="token" value="{{.token}}">
         <label class="checkbox">
           <input type="checkbox" name="remember-me" value="y"> Remember me
         </label>
-        <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+        <a href="/" class="btn btn-warning">Give up</a>
       </form>
 
     </div>

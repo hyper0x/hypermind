@@ -94,13 +94,15 @@ func login(w http.ResponseWriter, r *http.Request) {
 	attrMap := request.GenerateBasicAttrMap(w, r)
 	loginName := attrMap[request.LOGIN_NAME_KEY]
 	if r.Method == "GET" {
-		tokenKey := request.GenerateTokenKey(loginName, r)
-		go_lib.LogInfoln("TokenKey:", tokenKey)
-		token := request.GenerateToken()
-		go_lib.LogInfo("Token:", token)
-		request.SetToken(tokenKey, token)
+		token := request.GenerateToken(r, loginName)
+		go_lib.LogInfof("Token: %v\n", token)
+		request.SaveToken(token)
 		attrMap := request.GenerateBasicAttrMap(w, r)
-		attrMap["token"] = token
+		attrMap[request.TOKEN_KEY] = token.Key
+		hint := r.FormValue(request.HINT_KEY)
+		if len(hint) > 0 {
+			attrMap[request.HINT_KEY] = hint
+		}
 		t, err := template.ParseFiles(request.GeneratePagePath("login"))
 		if err != nil {
 			go_lib.LogErrorln("TemplateParseErr:", err)
@@ -111,23 +113,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		r.ParseForm()
-		token := r.Form.Get("token")
-		go_lib.LogInfoln("Token:", token)
-		validToken := false
-		if token != "" {
-			tokenKey := request.GenerateTokenKey(loginName, r)
-			go_lib.LogInfoln("TokenKey:", tokenKey)
-			storedToken := request.GetToken(tokenKey)
-			go_lib.LogInfoln("StoredToken:", storedToken)
-			if len(token) > 0 && len(storedToken) > 0 && token == storedToken {
-				validToken = true
-			}
-		}
+		tokenKey := r.Form.Get(request.TOKEN_KEY)
+		go_lib.LogInfoln("Token Key:", tokenKey)
+		validToken := request.CheckToken(tokenKey)
 		if !validToken {
-			go_lib.LogWarnf("Invalid token '%s' ! Ignore the login request.", token)
+			go_lib.LogWarnf("Invalid token key '%s' ! Ignore the login request.", tokenKey)
 			r.Method = "GET"
 			http.Redirect(w, r, r.URL.Path, http.StatusFound)
 			return
+		} else {
+			request.RemoveToken(tokenKey)
 		}
 		loginName = template.HTMLEscapeString(r.Form.Get(request.LOGIN_NAME_KEY))
 		go_lib.LogInfoln("login - loginName:", loginName)
@@ -137,8 +132,10 @@ func login(w http.ResponseWriter, r *http.Request) {
 		go_lib.LogInfoln("login - remember-me:", rememberMe)
 		validLogin, err := rights.VerifyUser(loginName, password)
 		go_lib.LogInfoln("Verify user:", validLogin)
+		redirectPath := "/"
 		if err != nil {
 			go_lib.LogErrorf("VerifyUserError (loginName=%s): %s\n", loginName, err)
+			redirectPath = r.URL.Path
 		} else {
 			if validLogin {
 				longTerm := len(rememberMe) == 0 || rememberMe != "y"
@@ -146,9 +143,13 @@ func login(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					go_lib.LogErrorf("SetSessionError (loginName=%s): %s\n", loginName, err)
 				}
+			} else {
+				hint := "Wrong login name or password."
+				redirectPath = request.AppendParameter(r.URL.Path, map[string]string{request.HINT_KEY: hint})
 			}
 		}
-		http.Redirect(w, r, "/", http.StatusFound)
+		go_lib.LogInfof("RPATH: %s\n", redirectPath)
+		http.Redirect(w, r, redirectPath, http.StatusFound)
 	}
 }
 

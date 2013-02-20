@@ -2,14 +2,19 @@ package request
 
 import (
 	"bytes"
-	"crypto/md5"
+	"crypto/sha1"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
+
+type Token struct {
+	Key   string
+	Value string
+}
 
 var userTokenMap map[string]string
 
@@ -17,44 +22,46 @@ func init() {
 	userTokenMap = make(map[string]string)
 }
 
-func GenerateTokenKey(loginName string, r *http.Request) (tokenKey string) {
+func GenerateToken(r *http.Request, extraInfo ...string) Token {
 	var buffer bytes.Buffer
-	buffer.WriteString(loginName)
-	buffer.WriteString("_")
-	buffer.WriteString(r.RemoteAddr)
-	buffer.WriteString("_")
-	buffer.WriteString(url.QueryEscape(r.RequestURI))
-	return buffer.String()
-}
-
-func GenerateToken() (token string) {
-	currentTime := time.Now().Unix()
-	h := md5.New()
-	io.WriteString(h, strconv.FormatInt(currentTime, 10))
-	token = fmt.Sprintf("%x", h.Sum(nil))
-	return
-}
-
-func GetToken(loginName string) (token string) {
-	if len(loginName) == 0 {
-		return
+	buffer.WriteString(r.RequestURI)
+	buffer.WriteString("|")
+	buffer.WriteString(strings.Split(r.RemoteAddr, ":")[0])
+	buffer.WriteString("|")
+	buffer.WriteString(strconv.FormatInt(time.Now().UnixNano(), 10))
+	for _, v := range extraInfo {
+		buffer.WriteString("|")
+		buffer.WriteString(v)
 	}
-	token, _ = userTokenMap[loginName]
-	return
+	info := buffer.String()
+	h := sha1.New()
+	io.WriteString(h, info)
+	tokenKey := fmt.Sprintf("%x", h.Sum(nil))
+	userTokenMap[tokenKey] = info
+	token := Token{Key: tokenKey, Value: info}
+	return token
 }
 
-func SetToken(loginName string, token string) bool {
-	if len(loginName) == 0 || len(token) == 0 {
+func SaveToken(token Token) bool {
+	if len(token.Key) == 0 {
 		return false
 	}
-	userTokenMap[loginName] = token
+	userTokenMap[token.Key] = token.Value
 	return true
 }
 
-func DeleteToken(loginName string) (result bool) {
-	if len(loginName) == 0 {
+func CheckToken(tokenKey string) bool {
+	if len(tokenKey) == 0 {
 		return false
 	}
-	delete(userTokenMap, loginName)
+	_, ok := userTokenMap[tokenKey]
+	return ok
+}
+
+func RemoveToken(tokenKey string) bool {
+	if len(tokenKey) == 0 {
+		return false
+	}
+	delete(userTokenMap, tokenKey)
 	return true
 }
