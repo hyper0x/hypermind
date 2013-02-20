@@ -87,6 +87,10 @@ func (self *MySession) Initialize(
 			go_lib.LogWarnln(warningMsg)
 		}
 	}
+	_, err = dao.SetHash(SESSION_MAP_KEY, grantors, self.key)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -96,9 +100,19 @@ func (self *MySession) Destroy() (bool, error) {
 		return false, errors.New(errorMsg)
 	}
 	go_lib.LogInfof("Destroy session (key=%s)... \n", self.key)
-	_, err := dao.DelKey(self.key)
+	grantors, err := dao.GetHash(self.key, SESSION_GRANTORS_KEY)
 	if err != nil {
 		return false, err
+	}
+	_, err = dao.DelKey(self.key)
+	if err != nil {
+		return false, err
+	}
+	if len(grantors) > 0 {
+		_, err = dao.DelHashField(SESSION_MAP_KEY, grantors)
+		if err != nil {
+			return false, err
+		}
 	}
 	go_lib.LogInfof("Delete session cookie (value=%s)...\n", self.sessionId)
 	hmSessionCookie.Delete(SESSION_COOKIE_KEY, self.w)
