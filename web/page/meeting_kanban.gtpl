@@ -18,6 +18,21 @@
 <div class="container">
     <div class="hero-unit">
         <h2>Come soon ...</h2>
+        <p>
+        <br>
+        <h4>The scheduled functions:</h4>
+        <ul>
+            <li>Publish meeting</li>
+            <li>Manage own meeting</li>
+            <li>Meeting list show</li>
+            <li>Meeting detail show</li>
+            <li>Register for meeting</li>
+            <li>* Registration confirmation & Reminding</li>
+            <li>* Meeting tag & aggregation & recommendation</li>
+            <li>* Meeting static/vertical analysis</li>
+        </ul>
+        <b>* Vision and long-term goals</b>
+        </p>
     </div>
 </div>
 </div>

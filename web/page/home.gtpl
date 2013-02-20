@@ -23,7 +23,7 @@
         The function including meeting kanban etc.
       </p>
       <p>
-        <a class="btn btn-primary btn-large" href="/?page={{.aboutWebsitePage}}">It's how to be constructed »</a>
+        <a class="btn btn-primary btn-large" href="/?page={{.aboutWebsitePage}}">Detail »</a>
       </p>
     </div>
   </div>
