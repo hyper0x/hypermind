@@ -13,6 +13,37 @@ import (
 	"time"
 )
 
+type NewAuthCodeTrigger func(string)
+
+var newAuthCodeTriggerMap map[string]NewAuthCodeTrigger
+
+func init() {
+	newAuthCodeTriggerMap = make(map[string]NewAuthCodeTrigger)
+	firstNewAuthCodeTrigger := func(newAuthCode string) {
+		go_lib.LogInfof("There has a new auth code '%s'.", newAuthCode)
+	}
+	AddNewAuthCodeTrigger("monitoring", firstNewAuthCodeTrigger)
+}
+
+func AddNewAuthCodeTrigger(id string, trigger NewAuthCodeTrigger) {
+	newAuthCodeTriggerMap[id] = trigger
+}
+
+func HasNewAuthCodeTrigger(id string) bool {
+	_, ok := newAuthCodeTriggerMap[id]
+	return ok
+}
+
+func DelNewAuthCodeTrigger(id string) {
+	delete(newAuthCodeTriggerMap, id)
+}
+
+func activateNewAuthCodeTriggers(newAuthCode string) {
+	for _, f := range newAuthCodeTriggerMap {
+		f(newAuthCode)
+	}
+}
+
 func VerifyAuthCode(authCode string) (bool, error) {
 	if len(authCode) == 0 {
 		return false, nil
@@ -28,7 +59,7 @@ func VerifyAuthCode(authCode string) (bool, error) {
 			for {
 				newAuthCode = generateAuthCode()
 				if newAuthCode != currentAuthCode {
-					go_lib.LogInfof("New Auth Code: %s\n", newAuthCode)
+					go_lib.LogInfof("New Auth Code: '%s'\n", newAuthCode)
 					break
 				}
 			}
@@ -61,10 +92,10 @@ func GetCurrentAuthCode() (string, error) {
 			buffer.WriteByte(v)
 		}
 		currentAuthCode = buffer.String()
-		go_lib.LogInfof("Current Code: %v\n", currentAuthCode)
+		go_lib.LogInfof("Current Code: '%s'\n", currentAuthCode)
 	} else {
 		initialAuthCode := generateInitialAuthCode()
-		go_lib.LogInfof("Initial Auth Code: %s\n", initialAuthCode)
+		go_lib.LogInfof("Initial Auth Code: '%s'\n", initialAuthCode)
 		err = pushAuthCode(initialAuthCode, conn)
 		if err != nil {
 			return "", err
@@ -78,7 +109,7 @@ func GetAndNewAuthCode() (string, error) {
 	conn := dao.RedisPool.Get()
 	defer conn.Close()
 	newAuthCode := generateAuthCode()
-	go_lib.LogInfof("New Auth Code: %s\n", newAuthCode)
+	go_lib.LogInfof("New Auth Code: '%s'\n", newAuthCode)
 	err := pushAuthCode(newAuthCode, conn)
 	if err != nil {
 		return "", err
@@ -91,9 +122,11 @@ func pushAuthCode(code string, conn redis.Conn) error {
 	if err != nil {
 		return err
 	}
-	if n < 0 {
+	if n <= 0 {
 		errorMsg := fmt.Sprintf("Redis operation failed! (cmd='LPUSH %v %v', n=%d)", dao.AUTH_CODE_KEY, code, n)
 		return errors.New(errorMsg)
+	} else {
+		activateNewAuthCodeTriggers(code)
 	}
 	return nil
 }
