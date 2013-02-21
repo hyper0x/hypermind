@@ -40,7 +40,7 @@ $(document).ready(function() {
         <div class="span2">
             <div class="well sidebar-nav">
                 <ul class="nav nav-list">
-                    <li class="nav-header">About</li>
+                    <li class="nav-header">Admin Board</li>
                 {{if allTrue .admin_auth_code}}
                     <li {{if equal .currentPage .adminAuthCodePage}}class="active"{{end}}><a href="/?page={{.adminAuthCodePage}}">Auth Code</a></li>
                 {{end}}
