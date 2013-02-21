@@ -42,8 +42,7 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 		"allTrue": request.AllTrue,
 	})
 	t, err := t.ParseFiles(request.GeneratePagePath(currentPage),
-		request.GeneratePagePath("header"),
-		request.GeneratePagePath("footer"),
+		request.GeneratePagePath("common"),
 		request.GeneratePagePath("navbar"))
 	if err != nil {
 		go_lib.LogErrorln("ParseFilesErr:", err)
@@ -103,7 +102,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		if len(hint) > 0 {
 			attrMap[request.HINT_KEY] = hint
 		}
-		t, err := template.ParseFiles(request.GeneratePagePath("login"), request.GeneratePagePath("footer"))
+		t, err := template.ParseFiles(request.GeneratePagePath("login"), request.GeneratePagePath("common"))
 		if err != nil {
 			go_lib.LogErrorln("TemplateParseErr:", err)
 		}
@@ -271,44 +270,45 @@ func initializeAuthCodePushHandler() {
 		}
 		defer conn.Close()
 		r.ParseForm()
+		reqType := r.FormValue("type")
 		go_lib.LogInfoln(request.GetRequestInfo(r))
 		attrMap := request.GenerateBasicAttrMap(w, r)
 		loginName := attrMap[request.LOGIN_NAME_KEY]
 		groupName := attrMap[request.GROUP_NAME_KEY]
-		go_lib.LogInfoln("Hijacking... (loginName=%s, groupName=%s)\n", loginName, groupName)
+		parameterOutline := fmt.Sprintf("[loginName=%s, groupName=%s, reqType=%s]", loginName, groupName, reqType)
+		go_lib.LogInfoln("Hijacking... %s \n", parameterOutline)
 		if groupName != rights.ADMIN_USER_GROUP_NAME {
 			errorMsg := "Authentication failed!"
 			http.Error(w, errorMsg, http.StatusForbidden)
-			go_lib.LogErrorf(errorMsg+" Hijacking by [loginName=%s, groupName=%s]\n", loginName, groupName)
+			go_lib.LogErrorf(errorMsg+" Hijacking by %s \n", parameterOutline)
 			return
 		}
-		currentAuthCode, err := request.GetCurrentAuthCode()
-		if err != nil {
-			go_lib.LogErrorf("GetCurrentAuthCodeError: %s\n", err)
-		}
-		go_lib.LogInfof("Push current auth code '%s' for user '%s'\n", currentAuthCode, loginName)
-		done := pushFunc(bufrw, currentAuthCode)
-		if !done {
-			go_lib.LogErrorf("Pushing current auth code '%s' for user '%s' is failing! \n", currentAuthCode, loginName)
+		if reqType != "lp" {
+			currentAuthCode, err := request.GetCurrentAuthCode()
+			if err != nil {
+				go_lib.LogErrorf("GetCurrentAuthCodeError: %s\n", err)
+			}
+			go_lib.LogInfof("Push current auth code '%s' %s \n", currentAuthCode, parameterOutline)
+			done := pushFunc(bufrw, currentAuthCode)
+			if !done {
+				go_lib.LogErrorf("Pushing current auth code '%s' is failing! %s \n", currentAuthCode, parameterOutline)
+			}
 		} else {
 			nacChan := make(chan string)
 			triggerFunc := func(newAuthCode string) {
 				nacChan <- newAuthCode
 			}
-			token := request.GenerateToken(r, loginName)
-			request.AddNewAuthCodeTrigger(token.Key, triggerFunc)
-			defer request.DelNewAuthCodeTrigger(token.Key)
-			for {
-				newAuthCode := <-nacChan
-				go_lib.LogInfof("Push new auth code '%s' for user '%s' \n", newAuthCode, loginName)
-				done = pushFunc(bufrw, newAuthCode)
-				if !done {
-					go_lib.LogErrorf("Pushing new auth code '%s' for user '%s' is failing! \n", newAuthCode, loginName)
-					break
-				}
+			triggerId := fmt.Sprintf("long-polling|%s|%s|%d", loginName, groupName, time.Now().UnixNano())
+			request.AddNewAuthCodeTrigger(triggerId, triggerFunc)
+			defer request.DelNewAuthCodeTrigger(triggerId)
+			newAuthCode := <-nacChan // wait for new auth code generating
+			go_lib.LogInfof("Push new auth code '%s' %s \n", newAuthCode, parameterOutline)
+			done := pushFunc(bufrw, newAuthCode)
+			if !done {
+				go_lib.LogErrorf("Pushing new auth code '%s' is failing! %s \n", newAuthCode, parameterOutline)
 			}
 		}
-		defer go_lib.LogInfof("The auth code push handler for user '%s' will be close. \n", loginName)
+		defer go_lib.LogInfof("The auth code push handler will be close. %s \n", parameterOutline)
 	})
 }
 

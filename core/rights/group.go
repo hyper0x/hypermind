@@ -24,7 +24,7 @@ var guestGroupRightsDict map[string]string = map[string]string{
 	base.ABOUT_WEBSITE_PAGE:     "true",
 	base.MEETING_KANBAN_PAGE:    "false",
 	base.PROJECT_HASH_RING_PAGE: "true",
-	base.ADMIN_CV_PAGE:          "false",
+	base.ADMIN_AUTH_CODE_PAGE:   "false",
 }
 
 var normalGroupRightsDict map[string]string = map[string]string{
@@ -33,7 +33,7 @@ var normalGroupRightsDict map[string]string = map[string]string{
 	base.ABOUT_WEBSITE_PAGE:     "true",
 	base.MEETING_KANBAN_PAGE:    "true",
 	base.PROJECT_HASH_RING_PAGE: "true",
-	base.ADMIN_CV_PAGE:          "false",
+	base.ADMIN_AUTH_CODE_PAGE:   "false",
 }
 
 var adminGroupRightsDict map[string]string = map[string]string{
@@ -42,7 +42,7 @@ var adminGroupRightsDict map[string]string = map[string]string{
 	base.ABOUT_WEBSITE_PAGE:     "true",
 	base.MEETING_KANBAN_PAGE:    "true",
 	base.PROJECT_HASH_RING_PAGE: "true",
-	base.ADMIN_CV_PAGE:          "true",
+	base.ADMIN_AUTH_CODE_PAGE:   "true",
 }
 
 var userGroupMap map[string]GroupRights = map[string]GroupRights{

@@ -22,6 +22,10 @@
                 {{if allTrue .about_me .about_website}}
                     <li {{if match .currentPage "^about_.*"}}class="active"{{end}}><a href="/?page={{.aboutMePage}}">About</a></li>
                 {{end}} 
+                
+                {{if allTrue .admin_auth_code}}
+                    <li {{if match .currentPage "^admin_.*"}}class="active"{{end}}><a href="/?page={{.adminAuthCodePage}}">Admin</a></li>
+                {{end}}
                 </ul>
             </div>
             <ul class="nav pull-right">

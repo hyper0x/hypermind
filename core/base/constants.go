@@ -17,6 +17,6 @@ const (
 	MEETING_KANBAN_PAGE     = "meeting_kanban"
 	PROJECT_HASH_RING_KEY   = "projectHashRingPage"
 	PROJECT_HASH_RING_PAGE  = "project_hash_ring"
-	ADMIN_CV_KEY            = "adminCvPage"
-	ADMIN_CV_PAGE           = "admin_cv"
+	ADMIN_AUTH_CODE_KEY     = "adminAuthCodePage"
+	ADMIN_AUTH_CODE_PAGE    = "admin_auth_code"
 )

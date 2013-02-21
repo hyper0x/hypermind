@@ -9,6 +9,7 @@
     <meta name="author" content="hyper-carrot">
 
     {{template "header-import"}}
+    {{template "js-import"}}
 
 </head>
 <body>
@@ -35,9 +36,6 @@
         </p>
     </div>
 </div>
-</div>
-
-{{template "footer-import"}}
 
 </body>
 </html>
