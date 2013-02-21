@@ -1,3 +1,4 @@
+{{define "page"}}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -72,9 +73,8 @@
 
     </div>
 
-    <script src="../js/jquery.js"></script>
-    <script src="../js/bootstrap.js"></script>
+    {{template "footer-import"}}
 
   </body>
 </html>
-
+{{end}}

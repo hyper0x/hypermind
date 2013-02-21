@@ -103,11 +103,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 		if len(hint) > 0 {
 			attrMap[request.HINT_KEY] = hint
 		}
-		t, err := template.ParseFiles(request.GeneratePagePath("login"))
+		t, err := template.ParseFiles(request.GeneratePagePath("login"), request.GeneratePagePath("footer"))
 		if err != nil {
 			go_lib.LogErrorln("TemplateParseErr:", err)
 		}
-		err = t.Execute(w, attrMap)
+		err = t.ExecuteTemplate(w, "page", attrMap)
 		if err != nil {
 			go_lib.LogErrorln("PageWriteErr:", err)
 		}
