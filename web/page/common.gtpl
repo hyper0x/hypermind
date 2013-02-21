@@ -20,8 +20,7 @@
 {{end}}
 
 {{define "js-import"}}
-<script src="../js/jquery-1.9.1.min.js"></script>
-<script src="../js/jquery-migrate-1.1.1.min.js"></script>
+<script src="../js/jquery.min.js"></script>
 <script src="../js/bootstrap.js"></script>
 <script src="../js/hypermind.js"></script>
 {{end}}

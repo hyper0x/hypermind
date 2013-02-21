@@ -276,11 +276,10 @@ func initializeAuthCodePushHandler() {
 		loginName := attrMap[request.LOGIN_NAME_KEY]
 		groupName := attrMap[request.GROUP_NAME_KEY]
 		parameterOutline := fmt.Sprintf("[loginName=%s, groupName=%s, reqType=%s]", loginName, groupName, reqType)
-		go_lib.LogInfoln("Hijacking... %s \n", parameterOutline)
 		if groupName != rights.ADMIN_USER_GROUP_NAME {
 			errorMsg := "Authentication failed!"
 			http.Error(w, errorMsg, http.StatusForbidden)
-			go_lib.LogErrorf(errorMsg+" Hijacking by %s \n", parameterOutline)
+			go_lib.LogErrorf(errorMsg+" [auth code push handler] %s \n", parameterOutline)
 			return
 		}
 		if reqType != "lp" {

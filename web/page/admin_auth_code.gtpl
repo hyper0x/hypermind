@@ -60,9 +60,9 @@ $(document).ready(function() {
                         </thead>
                         <tbody>
                           <tr>
-                            <td><span id="initial">A</span></td>
-                            <td><span id="current">B</span></td>
-                            <td><span id="count">C</span></td>
+                            <td><span id="initial">......</span></td>
+                            <td><span id="current">......</span></td>
+                            <td><span id="count">......</span></td>
                           </tr>
                         </tbody>
                     </table>
