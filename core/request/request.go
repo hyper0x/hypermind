@@ -66,17 +66,21 @@ func GenerateBasicAttrMap(w http.ResponseWriter, r *http.Request) map[string]str
 	} else {
 		var pageRights map[string]string
 		var loginName string
+		var groupName string
 		if hmSession != nil {
 			pageRights = getPageRights(hmSession)
 			loginName = getLoginName(hmSession)
+			groupName = getGroupName(hmSession)
 		} else {
 			pageRights = rights.GetGuestPageRights()
 			loginName = ""
+			groupName = ""
 		}
-		for p, r := range pageRights {
-			attrMap[p] = r
+		for p, pr := range pageRights {
+			attrMap[p] = pr
 		}
 		attrMap[LOGIN_NAME_KEY] = loginName
+		attrMap[GROUP_NAME_KEY] = groupName
 	}
 	return attrMap
 }
@@ -99,6 +103,18 @@ func getLoginName(hmSession *session.MySession) string {
 		return ""
 	}
 	return grantors
+}
+
+func getGroupName(hmSession *session.MySession) string {
+	if hmSession == nil {
+		return ""
+	}
+	groupName, err := hmSession.Get(session.SESSION_GROUP_KEY)
+	if err != nil {
+		go_lib.LogErrorln("SessionGetError (field=%s): %s\n", session.SESSION_GROUP_KEY, err)
+		return ""
+	}
+	return groupName
 }
 
 func getPageRights(hmSession *session.MySession) map[string]string {

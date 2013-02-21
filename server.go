@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -241,6 +242,76 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func initializeAuthCodePushHandler() {
+	pushFunc := func(bufrw *bufio.ReadWriter, authCode string) bool {
+		_, err := bufrw.Write([]byte(authCode))
+		if err == nil {
+			err = bufrw.Flush()
+		}
+		if err != nil {
+			go_lib.LogErrorf("PushAuthCodeError: %s\n", err)
+			return false
+		}
+		return true
+	}
+	http.HandleFunc("/auth_code", func(w http.ResponseWriter, r *http.Request) {
+		hj, ok := w.(http.Hijacker)
+		if !ok {
+			errorMsg := "The Web Server does not support Hijacking! "
+			http.Error(w, errorMsg, http.StatusInternalServerError)
+			go_lib.LogErrorf(errorMsg)
+			return
+		}
+		conn, bufrw, err := hj.Hijack()
+		if err != nil {
+			errorMsg := "Internal error!"
+			http.Error(w, errorMsg, http.StatusInternalServerError)
+			go_lib.LogErrorf(errorMsg+"Hijacking Error: %s\n", err)
+			return
+		}
+		defer conn.Close()
+		r.ParseForm()
+		go_lib.LogInfoln(request.GetRequestInfo(r))
+		attrMap := request.GenerateBasicAttrMap(w, r)
+		loginName := attrMap[request.LOGIN_NAME_KEY]
+		groupName := attrMap[request.GROUP_NAME_KEY]
+		go_lib.LogInfoln("Hijacking... (loginName=%s, groupName=%s)\n", loginName, groupName)
+		if groupName != rights.ADMIN_USER_GROUP_NAME {
+			errorMsg := "Authentication failed!"
+			http.Error(w, errorMsg, http.StatusForbidden)
+			go_lib.LogErrorf(errorMsg+" Hijacking by [loginName=%s, groupName=%s]\n", loginName, groupName)
+			return
+		}
+		currentAuthCode, err := request.GetCurrentAuthCode()
+		if err != nil {
+			go_lib.LogErrorf("GetCurrentAuthCodeError: %s\n", err)
+		}
+		go_lib.LogInfof("Push current auth code '%s' for user '%s'\n", currentAuthCode, loginName)
+		done := pushFunc(bufrw, currentAuthCode)
+		if !done {
+			go_lib.LogErrorf("Pushing current auth code '%s' for user '%s' is failing! \n", currentAuthCode, loginName)
+		} else {
+			nacChan := make(chan string)
+			triggerFunc := func(newAuthCode string) {
+				nacChan <- newAuthCode
+			}
+			token := request.GenerateToken(r, loginName)
+			request.AddNewAuthCodeTrigger(token.Key, triggerFunc)
+			defer request.DelNewAuthCodeTrigger(token.Key)
+			for {
+				newAuthCode := <-nacChan
+				go_lib.LogInfof("Push new auth code '%s' for user '%s' \n", newAuthCode, loginName)
+				done = pushFunc(bufrw, newAuthCode)
+				if !done {
+					go_lib.LogErrorf("Pushing new auth code '%s' for user '%s' is failing! \n", newAuthCode, loginName)
+					break
+				}
+			}
+		}
+		defer go_lib.LogInfof("The auth code push handler for user '%s' will be close. \n", loginName)
+	})
+}
+
 func main() {
 	flag.Parse()
 	fileServer := http.FileServer(http.Dir("web"))
@@ -253,6 +324,7 @@ func main() {
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/upload", upload)
 	http.HandleFunc("/get-cv", getCv)
+	initializeAuthCodePushHandler()
 	go_lib.LogInfof("Starting hypermind http server (port=%d)...\n", serverPort)
 	err := http.ListenAndServe(":"+fmt.Sprintf("%d", serverPort), nil)
 	if err != nil {

@@ -59,7 +59,6 @@ func VerifyAuthCode(authCode string) (bool, error) {
 			for {
 				newAuthCode = generateAuthCode()
 				if newAuthCode != currentAuthCode {
-					go_lib.LogInfof("New Auth Code: '%s'\n", newAuthCode)
 					break
 				}
 			}
@@ -109,7 +108,6 @@ func GetAndNewAuthCode() (string, error) {
 	conn := dao.RedisPool.Get()
 	defer conn.Close()
 	newAuthCode := generateAuthCode()
-	go_lib.LogInfof("New Auth Code: '%s'\n", newAuthCode)
 	err := pushAuthCode(newAuthCode, conn)
 	if err != nil {
 		return "", err
