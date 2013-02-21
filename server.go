@@ -67,7 +67,7 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		go_lib.LogErrorf("Occur error when verify auth code: %s\n", err)
 		// w.WriteHeader(500)
-		fmt.Fprintln(w, "Error: Somethin wrong when verify auth code!")
+		fmt.Fprintln(w, "Error: Something wrong when verify auth code!")
 		return
 	}
 	if !pass {
@@ -80,7 +80,7 @@ func getCv(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		go_lib.LogErrorf("Occur error when get cv content: %s.\n", err)
 		// w.WriteHeader(500)
-		fmt.Fprintln(w, "Error: Somethin wrong when get CV content!")
+		fmt.Fprintln(w, "Error: Something wrong when get CV content!")
 		return
 	}
 	fmt.Fprintln(w, cvContent)

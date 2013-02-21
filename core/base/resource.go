@@ -14,7 +14,11 @@ const (
 func GetCvContent() (string, error) {
 	filePath := GenerateResourceFilePath(CV_FILE_NAME)
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0666)
-	defer file.Close()
+	defer func() {
+		if file != nil {
+			file.Close()
+		}
+	}()
 	if err != nil {
 		return "", err
 	}
