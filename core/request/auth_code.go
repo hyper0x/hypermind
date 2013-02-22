@@ -131,41 +131,38 @@ func pushAuthCode(code string, conn redis.Conn) error {
 
 func generateInitialAuthCode() string {
 	var buffer bytes.Buffer
-	now := time.Now()
-	hour := fmt.Sprintf("%v", now.Hour())
-	buffer.WriteString(hour)
-	minute := fmt.Sprintf("%v", now.Minute())
-	buffer.WriteString(minute)
-	if buffer.Len() < 6 {
+	ns := fmt.Sprintf("%v", time.Now().Nanosecond())
+	buffer.WriteString(ns)
+	if buffer.Len() < AUTH_CODE_LENGTH {
 		for {
 			infilling := fmt.Sprintf("%v", rand.Intn(99))
 			buffer.WriteString(infilling)
-			if buffer.Len() >= 6 {
+			if buffer.Len() >= AUTH_CODE_LENGTH {
 				break
 			}
 		}
 	}
 	code := buffer.String()
-	if len(code) > 6 {
-		code = code[:6]
+	if len(code) > AUTH_CODE_LENGTH {
+		code = code[:AUTH_CODE_LENGTH]
 	}
 	return code
 }
 
 func generateAuthCode() string {
-	var limit int64 = 65535
+	var limit int64 = 255
 	var buffer bytes.Buffer
 	var temp string
 	for {
 		temp = strconv.FormatInt(rand.Int63n(limit), 16)
 		buffer.WriteString(temp)
-		if buffer.Len() >= 6 {
+		if buffer.Len() >= AUTH_CODE_LENGTH {
 			break
 		}
 	}
 	code := buffer.String()
-	if len(code) > 6 {
-		code = code[:6]
+	if len(code) > AUTH_CODE_LENGTH {
+		code = code[:AUTH_CODE_LENGTH]
 	}
 	return code
 }

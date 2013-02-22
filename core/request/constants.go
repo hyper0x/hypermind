@@ -12,3 +12,8 @@ const (
 	HINT_KEY         = "hint"
 	TOKEN_KEY        = "token"
 )
+
+// auth code
+const (
+	AUTH_CODE_LENGTH = 8
+)
