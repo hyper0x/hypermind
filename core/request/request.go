@@ -33,6 +33,7 @@ var pageParameterMap map[string]string = map[string]string{
 	base.MEETING_KANBAN_PAGE_KEY: base.MEETING_KANBAN_PAGE,
 	base.PROJECT_HASH_RING_KEY:   base.PROJECT_HASH_RING_PAGE,
 	base.ADMIN_AUTH_CODE_KEY:     base.ADMIN_AUTH_CODE_PAGE,
+	base.ADMIN_USER_LIST_KEY:     base.ADMIN_USER_LIST_PAGE,
 }
 
 func GeneratePagePath(reqPage string) string {

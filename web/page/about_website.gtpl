@@ -19,15 +19,7 @@
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span2">
-            <div class="well sidebar-nav">
-                <ul class="nav nav-list">
-                    <li class="nav-header">About</li>
-                {{if allTrue .about_me}}
-                    <li><a href="/?page={{.aboutMePage}}">About Me</a></li>
-                {{end}}
-                    <li class="active"><a href="/?{{.aboutWebsitePage}}">About Website</a></li>
-                </ul>
-            </div>
+            {{template "about-navbar" .}}
         </div>
         <div class="span10">
             <div class="hero-unit">

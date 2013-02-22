@@ -19,14 +19,7 @@
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span2">
-            <div class="well sidebar-nav">
-                <ul class="nav nav-list">
-                    <li class="nav-header">Projects</li>
-                {{if allTrue .project_hash_ring}}
-                    <li class="active"><a href="/?page={{.projectHashRingPage}}">Hash Ring</a></li>
-                {{end}}
-                </ul>
-            </div>
+            {{template "projects-navbar" .}}
         </div>
         <div class="span10">
             <div class="hero-unit">

@@ -21,9 +21,8 @@
                 {{end}}
                 {{if allTrue .about_me .about_website}}
                     <li {{if match .currentPage "^about_.*"}}class="active"{{end}}><a href="/?page={{.aboutMePage}}">About</a></li>
-                {{end}} 
-                
-                {{if allTrue .admin_auth_code}}
+                {{end}}
+                {{if allTrue .admin_auth_code .admin_user_list}}
                     <li {{if match .currentPage "^admin_.*"}}class="active"{{end}}><a href="/?page={{.adminAuthCodePage}}">Admin</a></li>
                 {{end}}
                 </ul>
@@ -41,5 +40,42 @@
 
         </div>
     </div>
+</div>
+{{end}}
+
+{{define "projects-navbar"}}
+<div class="well sidebar-nav">
+    <ul class="nav nav-list">
+        <li class="nav-header">Projects</li>
+    {{if allTrue .project_hash_ring}}
+        <li {{if equal .currentPage .projectHashRingPage}}class="active"{{end}}><a href="/?page={{.projectHashRingPage}}">Hash Ring</a></li>
+    {{end}}
+    </ul>
+</div>
+{{end}}
+
+{{define "about-navbar"}}
+<div class="well sidebar-nav">
+    <ul class="nav nav-list">
+        <li class="nav-header">About</li>
+        <li {{if equal .currentPage .aboutMePage}}class="active"{{end}}><a href="/?page={{.aboutMePage}}">About Me</a></li>
+    {{if allTrue .about_website}}
+        <li {{if equal .currentPage .aboutWebsitePage}}class="active"{{end}}><a href="/?page={{.aboutWebsitePage}}">About Website</a></li>
+    {{end}}
+    </ul>
+</div>
+{{end}}
+
+{{define "admin-navbar"}}
+<div class="well sidebar-nav">
+    <ul class="nav nav-list">
+        <li class="nav-header">Admin Board</li>
+    {{if allTrue .admin_auth_code}}
+        <li {{if equal .currentPage .adminAuthCodePage}}class="active"{{end}}><a href="/?page={{.adminAuthCodePage}}">Auth Code</a></li>
+    {{end}}
+     {{if allTrue .admin_user_list}}
+        <li {{if equal .currentPage .adminUserListPage}}class="active"{{end}}><a href="/?page={{.adminUserListPage}}">User List</a></li>
+    {{end}}
+    </ul>
 </div>
 {{end}}

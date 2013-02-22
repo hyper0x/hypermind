@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"go_lib"
@@ -23,7 +24,7 @@ func init() {
 	flag.IntVar(&serverPort, "port", 9091, "the server (http listen) port")
 }
 
-func welcome(w http.ResponseWriter, r *http.Request) {
+func requestDispatcher(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	go_lib.LogInfoln(request.GetRequestInfo(r))
 	attrMap := request.GenerateBasicAttrMap(w, r)
@@ -253,7 +254,7 @@ func getAuthCodeForAdmin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errorMsg := "Internal error!"
 		http.Error(w, errorMsg, http.StatusInternalServerError)
-		go_lib.LogErrorf(errorMsg+"Hijacking Error: %s\n", err)
+		go_lib.LogErrorf(errorMsg+" Hijacking Error: %s\n", err)
 		return
 	}
 	defer conn.Close()
@@ -298,6 +299,53 @@ func getAuthCodeForAdmin(w http.ResponseWriter, r *http.Request) {
 	defer go_lib.LogInfof("The auth code push handler will be close. %s \n", parameterOutline)
 }
 
+func getUserListForAdmin(w http.ResponseWriter, r *http.Request) {
+	hj, ok := w.(http.Hijacker)
+	if !ok {
+		errorMsg := "The Web Server does not support Hijacking! "
+		http.Error(w, errorMsg, http.StatusInternalServerError)
+		go_lib.LogErrorf(errorMsg)
+		return
+	}
+	conn, bufrw, err := hj.Hijack()
+	if err != nil {
+		errorMsg := "Internal error!"
+		http.Error(w, errorMsg, http.StatusInternalServerError)
+		go_lib.LogErrorf(errorMsg+" Hijacking Error: %s\n", err)
+		return
+	}
+	defer conn.Close()
+	r.ParseForm()
+	go_lib.LogInfoln(request.GetRequestInfo(r))
+	attrMap := request.GenerateBasicAttrMap(w, r)
+	loginName := attrMap[request.LOGIN_NAME_KEY]
+	groupName := attrMap[request.GROUP_NAME_KEY]
+	parameterOutline := fmt.Sprintf("[loginName=%s, groupName=%s]", loginName, groupName)
+	if groupName != rights.ADMIN_USER_GROUP_NAME {
+		errorMsg := "Authentication failed!"
+		http.Error(w, errorMsg, http.StatusForbidden)
+		go_lib.LogErrorf(errorMsg+" [user list handler] %s \n", parameterOutline)
+		return
+	}
+	var respBuffer bytes.Buffer
+	users, err := rights.FindUser("*")
+	if err != nil {
+		go_lib.LogErrorf("FindUserError: %s\n", err)
+	} else {
+		b, err := json.Marshal(users)
+		if err != nil {
+			go_lib.LogErrorf("JsonMarshalError (source=%v): %s\n", users, err)
+		} else {
+			respBuffer.WriteString(string(b))
+		}
+	}
+	resp := respBuffer.String()
+	done := pushResponse(bufrw, resp)
+	if !done {
+		go_lib.LogErrorf("Pushing user list '%s' is failing! %s \n", resp, parameterOutline)
+	}
+}
+
 func pushResponse(bufrw *bufio.ReadWriter, authCode string) bool {
 	_, err := bufrw.Write([]byte(authCode))
 	if err == nil {
@@ -316,13 +364,14 @@ func main() {
 	http.Handle("/css/", fileServer)
 	http.Handle("/js/", fileServer)
 	http.Handle("/img/", fileServer)
-	http.HandleFunc("/", welcome)
+	http.HandleFunc("/", requestDispatcher)
 	http.HandleFunc("/register", register)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/upload", upload)
 	http.HandleFunc("/get-cv", getCv)
 	http.HandleFunc("/auth_code", getAuthCodeForAdmin)
+	http.HandleFunc("/user_list", getUserListForAdmin)
 	go_lib.LogInfof("Starting hypermind http server (port=%d)...\n", serverPort)
 	err := http.ListenAndServe(":"+fmt.Sprintf("%d", serverPort), nil)
 	if err != nil {

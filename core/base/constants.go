@@ -19,4 +19,6 @@ const (
 	PROJECT_HASH_RING_PAGE  = "project_hash_ring"
 	ADMIN_AUTH_CODE_KEY     = "adminAuthCodePage"
 	ADMIN_AUTH_CODE_PAGE    = "admin_auth_code"
+	ADMIN_USER_LIST_KEY     = "adminUserListPage"
+	ADMIN_USER_LIST_PAGE    = "admin_user_list"
 )
