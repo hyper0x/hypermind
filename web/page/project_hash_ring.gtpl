@@ -24,6 +24,9 @@
         <div class="span10">
             <div class="hero-unit">
                 <p>
+                    It from the internal training by me speech in my company.
+                </p>
+                <p>
                     Hash ring is a kind of consistency hash realization. 
                     Now, consider this situation: A software system was added a data cache layer in order to relieve the database of pressure as a result of a mass of query. In data cache layer, they use multi nodes cluster operation mode. The problem: How data in these nodes distribution? How about the performance, expandability and complexity?
                 </p>
@@ -139,6 +142,7 @@
                     Go Edition: <a href="https://github.com/hyper-carrot/chash4go">chash4go</a><br>
                     Python Edition: <a href="https://github.com/hyper-carrot/chash4py">chash4py</a><br>
                     Java Edition: <a href="https://github.com/hyper-carrot/chash4j">chash4j</a><br>
+                    All of these editions can be used in the production environment.
                 </p>
                 <p>
                     That's all. Welcome to exchange!
