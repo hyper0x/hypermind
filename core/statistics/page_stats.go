@@ -8,7 +8,7 @@ import (
 	"hypermind/core/dao"
 )
 
-func SetPageAccessRecord(pageName string, visitor string, number uint64) (bool, error) {
+func AddPageAccessRecord(pageName string, visitor string, number uint64) (bool, error) {
 	if len(pageName) == 0 {
 		return false, errors.New("The parameter named pageName is EMPTY!")
 	}

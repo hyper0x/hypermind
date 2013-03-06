@@ -12,6 +12,7 @@ import (
 	"hypermind/core/request"
 	"hypermind/core/rights"
 	"hypermind/core/session"
+	"hypermind/core/statistics"
 	"io"
 	"net/http"
 	"os"
@@ -53,6 +54,7 @@ func requestDispatcher(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		go_lib.LogErrorln("ExecuteTemplateErr:", err)
 	}
+	recordPageAccessInfo(currentPage, attrMap[request.LOGIN_NAME_KEY], uint64(1))
 }
 
 func getCv(w http.ResponseWriter, r *http.Request) {
@@ -356,6 +358,18 @@ func pushResponse(bufrw *bufio.ReadWriter, authCode string) bool {
 		return false
 	}
 	return true
+}
+
+func recordPageAccessInfo(pageName string, visitor string, number uint64) bool {
+	var result bool
+	done, err := statistics.AddPageAccessRecord(pageName, visitor, number)
+	if err != nil {
+		go_lib.LogErrorf("Adding page access record error: %s (pageName=%s, visitor=%s, number=%d)\n", err, pageName, visitor, number)
+		result = false
+	} else {
+		result = done
+	}
+	return result
 }
 
 func main() {

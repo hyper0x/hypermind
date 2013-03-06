@@ -21,13 +21,13 @@ func TestPageAccessRecord(t *testing.T) {
 	if debugTag {
 		t.Logf("Testing page access record (%s)...", parameterInfo)
 	}
-	done, err := SetPageAccessRecord(pageName, visitor, uint64(rand.Int63n(99)))
+	done, err := AddPageAccessRecord(pageName, visitor, uint64(rand.Int63n(99)))
 	if err != nil {
-		t.Errorf("Setting page access record error: %s %s\n", err, parameterInfo)
+		t.Errorf("Adding page access record error: %s %s\n", err, parameterInfo)
 		t.FailNow()
 	}
 	if !done {
-		t.Logf("Setting page access record is failing! %s", parameterInfo)
+		t.Logf("Adding page access record is failing! %s", parameterInfo)
 		t.FailNow()
 	}
 	done, err = ClearPageAccessRecord(pageName, visitor)
