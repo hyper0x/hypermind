@@ -10,7 +10,8 @@ const (
 
 // redis key
 const (
-	AUTH_CODE_KEY   = "auth_code"
-	USER_KEY_PREFIX = "hmuser-"
-	USER_GROUP_KEY  = "hmusergroup"
+	AUTH_CODE_KEY           = "auth_code"
+	USER_KEY_PREFIX         = "hmuser-"
+	USER_GROUP_KEY          = "hmusergroup"
+	PAGE_ACCESS_RECORDS_KEY = "page_access_records"
 )
