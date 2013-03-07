@@ -8,10 +8,15 @@ import (
 	"hypermind/core/dao"
 )
 
+var signMap map[string]*go_lib.Sign = make(map[string]*go_lib.Sign)
+
 func AddPageAccessRecord(pageName string, visitor string, number uint64) (bool, error) {
 	if len(pageName) == 0 {
 		return false, errors.New("The parameter named pageName is EMPTY!")
 	}
+	sign := getSignForPage(pageName)
+	sign.Set()
+	defer sign.Unset()
 	parameterInfo := fmt.Sprintf("(pageName=%s, visitor=%s, number=%d)", pageName, visitor, number)
 	var result bool
 	conn := dao.RedisPool.Get()
@@ -53,6 +58,9 @@ func ClearPageAccessRecord(pageName string, visitor string) (bool, error) {
 	if len(pageName) == 0 {
 		return false, errors.New("The parameter named pageName is EMPTY!")
 	}
+	sign := getSignForPage(pageName)
+	sign.Set()
+	defer sign.Unset()
 	parameterInfo := fmt.Sprintf("(pageName=%s, visitor=%s)", pageName, visitor)
 	var result bool
 	conn := dao.RedisPool.Get()
@@ -121,4 +129,13 @@ func formatVisitorAccessRecords(records map[string]uint64) (string, error) {
 	}
 	literals = string(b)
 	return literals, nil
+}
+
+func getSignForPage(pageName string) *go_lib.Sign {
+	sign := signMap[pageName]
+	if sign == nil {
+		sign = go_lib.NewSign()
+		signMap[pageName] = sign
+	}
+	return sign
 }
