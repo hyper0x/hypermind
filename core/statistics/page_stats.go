@@ -25,25 +25,20 @@ func AddPageAccessRecord(pageName string, visitor string, number uint64) (bool, 
 	if err != nil {
 		return false, err
 	}
-	var visitorAccessRecords map[string]uint64
-	if len(value) > 0 {
-		visitorAccessRecords, err = parseVisitorAccessRecords(value)
-		if err != nil {
-			go_lib.LogErrorf("Parsing visitor access records error: %s %s\n", err, parameterInfo)
-		}
-	}
-	if visitorAccessRecords == nil {
-		visitorAccessRecords = make(map[string]uint64)
-	}
-	visitorAccessRecords[visitor] = visitorAccessRecords[visitor] + uint64(number)
-	literals, err := formatVisitorAccessRecords(visitorAccessRecords)
+	visitorAccessRecords, err := parseVisitorAccessRecords(value)
 	if err != nil {
-		go_lib.LogErrorf("Formating visitor access records error: %s %s\n", err, parameterInfo)
+		go_lib.LogErrorf("Parsing visitor access records error: %s %s\n", err, parameterInfo)
 	}
-	if len(literals) > 0 {
-		result, err = dao.SetHash(dao.PAGE_ACCESS_RECORDS_KEY, pageName, literals)
+	if visitorAccessRecords != nil {
+		visitorAccessRecords[visitor] = visitorAccessRecords[visitor] + uint64(number)
+		literals, err := formatVisitorAccessRecords(visitorAccessRecords)
 		if err != nil {
-			return result, err
+			go_lib.LogErrorf("Formating visitor access records error: %s %s\n", err, parameterInfo)
+		} else {
+			result, err = dao.SetHash(dao.PAGE_ACCESS_RECORDS_KEY, pageName, literals)
+			if err != nil {
+				return result, err
+			}
 		}
 	}
 	if result {
@@ -77,16 +72,10 @@ func ClearPageAccessRecord(pageName string, visitor string) (bool, error) {
 		_, ok := visitorAccessRecords[visitor]
 		if ok {
 			delete(visitorAccessRecords, visitor)
-			var literals string
-			validliterals := true
-			if len(visitorAccessRecords) > 0 {
-				literals, err = formatVisitorAccessRecords(visitorAccessRecords)
-				if err != nil {
-					go_lib.LogErrorf("Formating visitor access records error: %s %s\n", err, parameterInfo)
-					validliterals = false
-				}
-			}
-			if validliterals {
+			literals, err := formatVisitorAccessRecords(visitorAccessRecords)
+			if err != nil {
+				go_lib.LogErrorf("Formating visitor access records error: %s %s\n", err, parameterInfo)
+			} else {
 				result, err = dao.SetHash(dao.PAGE_ACCESS_RECORDS_KEY, pageName, literals)
 				if err != nil {
 					return false, err
@@ -102,10 +91,33 @@ func ClearPageAccessRecord(pageName string, visitor string) (bool, error) {
 	return result, nil
 }
 
+func GetPageAccessRecords(pageName string) (map[string]uint64, error) {
+	if len(pageName) == 0 {
+		return nil, errors.New("The parameter named pageName is EMPTY!")
+	}
+	sign := getSignForPage(pageName)
+	sign.Set()
+	defer sign.Unset()
+	parameterInfo := fmt.Sprintf("(pageName=%s)", pageName)
+	conn := dao.RedisPool.Get()
+	defer conn.Close()
+	value, err := dao.GetHash(dao.PAGE_ACCESS_RECORDS_KEY, pageName)
+	if err != nil {
+		errorMsg := fmt.Sprintf("Getting visitor access records error: %s %s\n", err, parameterInfo)
+		return nil, errors.New(errorMsg)
+	}
+	var visitorAccessRecords map[string]uint64
+	visitorAccessRecords, err = parseVisitorAccessRecords(value)
+	if err != nil {
+		errorMsg := fmt.Sprintf("Parsing visitor access records error: %s %s\n", err, parameterInfo)
+		return nil, errors.New(errorMsg)
+	}
+	return visitorAccessRecords, nil
+}
+
 func parseVisitorAccessRecords(literals string) (map[string]uint64, error) {
 	if len(literals) == 0 {
-		errorMsg := fmt.Sprintf("The parameter named literals is EMPTY! IGNORE the unmarshal operation.")
-		return nil, errors.New(errorMsg)
+		return make(map[string]uint64), nil
 	}
 	var records map[string]uint64
 	err := json.Unmarshal([]byte(literals), &records)
@@ -118,8 +130,7 @@ func parseVisitorAccessRecords(literals string) (map[string]uint64, error) {
 
 func formatVisitorAccessRecords(records map[string]uint64) (string, error) {
 	if len(records) == 0 {
-		errorMsg := fmt.Sprintf("The parameter named records is EMPTY! IGNORE the marshal operation.")
-		return "", errors.New(errorMsg)
+		return "", nil
 	}
 	var literals string
 	b, err := json.Marshal(records)

@@ -27,8 +27,22 @@ func TestPageAccessRecord(t *testing.T) {
 		t.FailNow()
 	}
 	if !done {
-		t.Logf("Adding page access record is failing! %s", parameterInfo)
+		t.Fatalf("Adding page access record is failing! %s", parameterInfo)
 		t.FailNow()
+	}
+	visitorAccessRecords, err := GetPageAccessRecords(pageName)
+	if err != nil {
+		t.Errorf("Getting page access record error: %s %s\n", err, parameterInfo)
+		t.FailNow()
+	}
+	expectedRecordLen := 1
+	recordLen := len(visitorAccessRecords)
+	if recordLen != expectedRecordLen {
+		t.Fatalf("The length of visitor access record should be '%s', but it's '%s'.\n", expectedRecordLen, recordLen)
+	}
+	_, ok := visitorAccessRecords[visitor]
+	if !ok {
+		t.Fatalf("The access record of visitor '%s' should be existing, but it's nonexistent.\n", visitor)
 	}
 	done, err = ClearPageAccessRecord(pageName, visitor)
 	if err != nil {
@@ -36,7 +50,7 @@ func TestPageAccessRecord(t *testing.T) {
 		t.FailNow()
 	}
 	if !done {
-		t.Logf("Clearing page access record is failing! %s", parameterInfo)
+		t.Fatalf("Clearing page access record is failing! %s", parameterInfo)
 		t.FailNow()
 	}
 }
