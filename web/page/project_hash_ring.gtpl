@@ -139,9 +139,9 @@
                     <img src="/img/chash_benchmark2.png">
                     <br>
                     The source code of hash ring implemented by me is here: <br>
-                    Go Edition: <a href="https://github.com/hyper-carrot/chash4go">chash4go</a><br>
-                    Python Edition: <a href="https://github.com/hyper-carrot/chash4py">chash4py</a><br>
-                    Java Edition: <a href="https://github.com/hyper-carrot/chash4j">chash4j</a><br>
+                    Go Edition: <a href="https://github.com/hyper-carrot/chash4go" target="_blank">chash4go</a><br>
+                    Python Edition: <a href="https://github.com/hyper-carrot/chash4py" target="_blank">chash4py</a><br>
+                    Java Edition: <a href="https://github.com/hyper-carrot/chash4j" target="_blank">chash4j</a><br>
                     All of these editions can be used in the production environment.
                 </p>
                 <p>

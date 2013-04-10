@@ -33,8 +33,11 @@
                     I focus on Clojure and Go programming language, and contribute strength in order to the popularization of them in Chinese community.
                 </p>
                 <p>
-                    My homepage in GitHub is
-                    <a class="btn btn-small" href="https://github.com/hyper-carrot">hyper-carrot</a>
+                    My homepage on GitHub: 
+                    <a class="btn btn-small" href="https://github.com/hyper-carrot" target="_blank">hyper-carrot</a>
+                    .
+                    And, my homepage on Linkedin: 
+                    <a class="btn btn-small" href="http://www.linkedin.com/pub/harry-hao/1b/a19/59" target="_blank">Harry Hao</a>
                     .
                 </p>
                 <p>

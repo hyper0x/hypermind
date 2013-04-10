@@ -25,15 +25,15 @@
             <div class="hero-unit">
                 <p>
                     This website constructed by
-                    <a class="btn btn-small" href="http://golang.org">Golang</a>
+                    <a class="btn btn-small" href="http://golang.org" target="_blank">Golang</a>
                     &
-                    <a class="btn btn-small" href="http://twitter.github.com/bootstrap/">Bootstrap</a>
+                    <a class="btn btn-small" href="http://twitter.github.com/bootstrap/" target="_blank">Bootstrap</a>
                     &
-                    <a class="btn btn-small" href="http://redis.io/">Redis</a>
+                    <a class="btn btn-small" href="http://redis.io/" target="_blank">Redis</a>
                     .
                 </p>
                 <p>
-                    <a href="https://github.com/hyper-carrot/hypermind" class="btn btn-primary">Source code</a>
+                    <a href="https://github.com/hyper-carrot/hypermind" target="_blank" class="btn btn-primary">Source code</a>
                 </p>
             </div>
         </div>
