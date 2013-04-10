@@ -15,6 +15,7 @@ import (
 	"hypermind/core/statistics"
 	"io"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"time"
 )
