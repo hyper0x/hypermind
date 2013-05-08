@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go_lib"
+	"hypermind/core/base"
 	"hypermind/core/controller"
 	"net/http"
 	_ "net/http/pprof"
@@ -29,11 +29,11 @@ func main() {
 	http.HandleFunc("/get-cv", controller.GetCv)
 	http.HandleFunc("/auth_code", controller.GetAuthCodeForAdmin)
 	http.HandleFunc("/user_list", controller.GetUserListForAdmin)
-	go_lib.LogInfof("Starting hypermind http server (port=%d)...\n", serverPort)
+	base.Logger().Infof("Starting hypermind http server (port=%d)...\n", serverPort)
 	err := http.ListenAndServe(":"+fmt.Sprintf("%d", serverPort), nil)
 	if err != nil {
-		go_lib.LogFatalln("ListenAndServeError: ", err)
+		base.Logger().Fatalln("ListenAndServeError: ", err)
 	} else {
-		go_lib.LogInfoln("Hypermind http server is started.")
+		base.Logger().Infoln("Hypermind http server is started.")
 	}
 }

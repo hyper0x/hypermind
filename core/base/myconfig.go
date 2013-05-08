@@ -10,7 +10,7 @@ func init() {
 	hmConfig = go_lib.Config{Path: CONFIG_FILE_NAME}
 	err := hmConfig.ReadConfig(false)
 	if err != nil {
-		go_lib.LogErrorln("ConfigLoadError: ", err)
+		Logger().Errorln("ConfigLoadError: ", err)
 	}
 }
 

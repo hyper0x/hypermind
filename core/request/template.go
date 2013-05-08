@@ -2,7 +2,7 @@ package request
 
 import (
 	"fmt"
-	"go_lib"
+	"hypermind/core/base"
 	"regexp"
 )
 
@@ -35,7 +35,7 @@ func MatchString(args ...interface{}) bool {
 		pattern := v.(string)
 		pass, err := regexp.MatchString(pattern, target)
 		if err != nil {
-			go_lib.LogErrorf("RegexpMatchError (target=%s, pattern=%s): %s\n", target, pattern, err)
+			base.Logger().Errorf("RegexpMatchError (target=%s, pattern=%s): %s\n", target, pattern, err)
 			return false
 		}
 		if !pass {

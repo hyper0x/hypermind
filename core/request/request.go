@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"go_lib"
 	"hypermind/core/base"
 	"hypermind/core/rights"
 	"hypermind/core/session"
@@ -48,7 +47,7 @@ func GetRequestInfo(r *http.Request) string {
 	requestInfo := RequestInfo{Form: r.Form, Method: r.Method, Path: r.URL.Path, Scheme: r.URL.Scheme}
 	b, err := json.Marshal(requestInfo)
 	if err != nil {
-		go_lib.LogErrorln("JsonMarshalError:", err)
+		base.Logger().Errorln("JsonMarshalError:", err)
 	}
 	return string(b)
 }
@@ -63,7 +62,7 @@ func GenerateBasicAttrMap(w http.ResponseWriter, r *http.Request) map[string]str
 	}
 	hmSession, err := GetSession(w, r)
 	if err != nil {
-		go_lib.LogErrorln("GetSessionError: %s\n", err)
+		base.Logger().Errorln("GetSessionError: %s\n", err)
 	} else {
 		var pageRights map[string]string
 		var loginName string
@@ -100,7 +99,7 @@ func getLoginName(hmSession *session.MySession) string {
 	}
 	grantors, err := hmSession.Get(session.SESSION_GRANTORS_KEY)
 	if err != nil {
-		go_lib.LogErrorln("SessionGetError (field=%s): %s\n", session.SESSION_GRANTORS_KEY, err)
+		base.Logger().Errorln("SessionGetError (field=%s): %s\n", session.SESSION_GRANTORS_KEY, err)
 		return ""
 	}
 	return grantors
@@ -112,7 +111,7 @@ func getGroupName(hmSession *session.MySession) string {
 	}
 	groupName, err := hmSession.Get(session.SESSION_GROUP_KEY)
 	if err != nil {
-		go_lib.LogErrorln("SessionGetError (field=%s): %s\n", session.SESSION_GROUP_KEY, err)
+		base.Logger().Errorln("SessionGetError (field=%s): %s\n", session.SESSION_GROUP_KEY, err)
 		return ""
 	}
 	return groupName
@@ -125,12 +124,12 @@ func getPageRights(hmSession *session.MySession) map[string]string {
 	}
 	groupName, err := hmSession.Get(session.SESSION_GROUP_KEY)
 	if err != nil {
-		go_lib.LogErrorln("SessionGetError (field=%s): %s\n", session.SESSION_GROUP_KEY, err)
+		base.Logger().Errorln("SessionGetError (field=%s): %s\n", session.SESSION_GROUP_KEY, err)
 		return pageRights
 	}
 	userGroup, err := rights.GetUserGroup(groupName)
 	if err != nil {
-		go_lib.LogErrorln("GetUserGroupError (groupName=%s): %s\n", groupName, err)
+		base.Logger().Errorln("GetUserGroupError (groupName=%s): %s\n", groupName, err)
 		return pageRights
 	}
 	if userGroup != nil {
@@ -143,13 +142,13 @@ func GetSessionMap(w http.ResponseWriter, r *http.Request) map[string]string {
 	var sessionMap map[string]string
 	hmSession, err := GetSession(w, r)
 	if err != nil {
-		go_lib.LogErrorln("GetSessionError: %s\n", err)
+		base.Logger().Errorln("GetSessionError: %s\n", err)
 		return sessionMap
 	}
 	if hmSession != nil {
 		sessionMap, err = hmSession.GetAll()
 		if err != nil {
-			go_lib.LogErrorln("SessionGetAllError: %s\n", err)
+			base.Logger().Errorln("SessionGetAllError: %s\n", err)
 			return sessionMap
 		}
 	}
@@ -165,7 +164,7 @@ func splitHostPort(requestHost string) (host string, port string) {
 		config := base.GetHmConfig()
 		err := config.ReadConfig(false)
 		if err != nil {
-			go_lib.LogErrorln("ConfigLoadError: ", err)
+			base.Logger().Errorln("ConfigLoadError: ", err)
 			port = "80"
 		} else {
 			port = fmt.Sprintf("%v", config.Dict["server_port"])
@@ -211,9 +210,9 @@ func DeleteTempFile(delay time.Duration, filePath string) (err error) {
 	time.Sleep(delay)
 	err = os.Remove(filePath)
 	if err != nil {
-		go_lib.LogErrorf("Occur error when delete file '%s': %s\n", filePath, err)
+		base.Logger().Errorf("Occur error when delete file '%s': %s\n", filePath, err)
 	} else {
-		go_lib.LogInfof("The file '%s' is deleted.\n", filePath, err)
+		base.Logger().Infof("The file '%s' is deleted.\n", filePath, err)
 	}
 	return
 }

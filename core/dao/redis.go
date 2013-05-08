@@ -3,7 +3,6 @@ package dao
 import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
-	"go_lib"
 	. "hypermind/core/base"
 	"time"
 )
@@ -18,7 +17,7 @@ func init() {
 	config := GetHmConfig()
 	err := config.ReadConfig(false)
 	if err != nil {
-		go_lib.LogErrorln("ConfigLoadError: ", err)
+		Logger().Errorln("ConfigLoadError: ", err)
 	}
 	redisServerIp = config.Dict["redis_server_ip"]
 	if len(redisServerIp) == 0 {

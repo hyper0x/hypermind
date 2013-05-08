@@ -1,5 +1,15 @@
 package base
 
+import (
+	"go_lib/logging"
+)
+
+var logger logging.Logger = logging.GetSimpleLogger()
+
+func Logger() logging.Logger {
+	return logger
+}
+
 // config
 const (
 	CONFIG_FILE_NAME = "hypermind.config"

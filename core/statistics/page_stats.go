@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go_lib"
+	"hypermind/core/base"
 	"hypermind/core/dao"
 )
 
@@ -27,13 +28,13 @@ func AddPageAccessRecord(pageName string, visitor string, number uint64) (bool, 
 	}
 	visitorAccessRecords, err := parseVisitorAccessRecords(value)
 	if err != nil {
-		go_lib.LogErrorf("Parsing visitor access records error: %s %s\n", err, parameterInfo)
+		base.Logger().Errorf("Parsing visitor access records error: %s %s\n", err, parameterInfo)
 	}
 	if visitorAccessRecords != nil {
 		visitorAccessRecords[visitor] = visitorAccessRecords[visitor] + uint64(number)
 		literals, err := formatVisitorAccessRecords(visitorAccessRecords)
 		if err != nil {
-			go_lib.LogErrorf("Formating visitor access records error: %s %s\n", err, parameterInfo)
+			base.Logger().Errorf("Formating visitor access records error: %s %s\n", err, parameterInfo)
 		} else {
 			result, err = dao.SetHash(dao.PAGE_ACCESS_RECORDS_KEY, pageName, literals)
 			if err != nil {
@@ -42,9 +43,9 @@ func AddPageAccessRecord(pageName string, visitor string, number uint64) (bool, 
 		}
 	}
 	if result {
-		go_lib.LogInfof("The page access info has been recorded. %s\n", parameterInfo)
+		base.Logger().Infof("The page access info has been recorded. %s\n", parameterInfo)
 	} else {
-		go_lib.LogWarnf("The page access info failed to record. %s\n", parameterInfo)
+		base.Logger().Warnf("The page access info failed to record. %s\n", parameterInfo)
 	}
 	return result, nil
 }
@@ -66,7 +67,7 @@ func ClearPageAccessRecord(pageName string, visitor string) (bool, error) {
 	}
 	visitorAccessRecords, err := parseVisitorAccessRecords(value)
 	if err != nil {
-		go_lib.LogErrorf("Parsing visitor access records error: %s %s\n", err, parameterInfo)
+		base.Logger().Errorf("Parsing visitor access records error: %s %s\n", err, parameterInfo)
 	}
 	if visitorAccessRecords != nil {
 		_, ok := visitorAccessRecords[visitor]
@@ -74,7 +75,7 @@ func ClearPageAccessRecord(pageName string, visitor string) (bool, error) {
 			delete(visitorAccessRecords, visitor)
 			literals, err := formatVisitorAccessRecords(visitorAccessRecords)
 			if err != nil {
-				go_lib.LogErrorf("Formating visitor access records error: %s %s\n", err, parameterInfo)
+				base.Logger().Errorf("Formating visitor access records error: %s %s\n", err, parameterInfo)
 			} else {
 				result, err = dao.SetHash(dao.PAGE_ACCESS_RECORDS_KEY, pageName, literals)
 				if err != nil {
@@ -84,9 +85,9 @@ func ClearPageAccessRecord(pageName string, visitor string) (bool, error) {
 		}
 	}
 	if result {
-		go_lib.LogInfof("The page access info has been cleared. %s\n", parameterInfo)
+		base.Logger().Infof("The page access info has been cleared. %s\n", parameterInfo)
 	} else {
-		go_lib.LogWarnf("The page access info failed to clear. %s\n", parameterInfo)
+		base.Logger().Warnf("The page access info failed to clear. %s\n", parameterInfo)
 	}
 	return result, nil
 }

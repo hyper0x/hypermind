@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
-	"go_lib"
+	"hypermind/core/base"
 	"hypermind/core/dao"
 	"math/rand"
 	"strconv"
@@ -20,7 +20,7 @@ var newAuthCodeTriggerMap map[string]NewAuthCodeTrigger
 func init() {
 	newAuthCodeTriggerMap = make(map[string]NewAuthCodeTrigger)
 	firstNewAuthCodeTrigger := func(newAuthCode string) {
-		go_lib.LogInfof("There has a new auth code '%s'.", newAuthCode)
+		base.Logger().Infof("There has a new auth code '%s'.", newAuthCode)
 	}
 	AddNewAuthCodeTrigger("monitoring", firstNewAuthCodeTrigger)
 }
@@ -67,7 +67,7 @@ func VerifyAuthCode(authCode string) (bool, error) {
 				defer conn.Close()
 				err = pushAuthCode(newAuthCode, conn)
 				if err != nil {
-					go_lib.LogErrorf("New auth code pushing error: %s\n", err)
+					base.Logger().Errorf("New auth code pushing error: %s\n", err)
 				}
 			}
 		}()
@@ -91,10 +91,10 @@ func GetCurrentAuthCode() (string, error) {
 			buffer.WriteByte(v)
 		}
 		currentAuthCode = buffer.String()
-		go_lib.LogInfof("Current Code: '%s'\n", currentAuthCode)
+		base.Logger().Infof("Current Code: '%s'\n", currentAuthCode)
 	} else {
 		initialAuthCode := generateInitialAuthCode()
-		go_lib.LogInfof("Initial Auth Code: '%s'\n", initialAuthCode)
+		base.Logger().Infof("Initial Auth Code: '%s'\n", initialAuthCode)
 		err = pushAuthCode(initialAuthCode, conn)
 		if err != nil {
 			return "", err

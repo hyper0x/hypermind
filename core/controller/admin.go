@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"go_lib"
+	"hypermind/core/base"
 	"hypermind/core/request"
 	"hypermind/core/rights"
 	"net/http"
@@ -16,20 +16,20 @@ func GetAuthCodeForAdmin(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		errorMsg := "The Web Server does not support Hijacking! "
 		http.Error(w, errorMsg, http.StatusInternalServerError)
-		go_lib.LogErrorf(errorMsg)
+		base.Logger().Errorf(errorMsg)
 		return
 	}
 	conn, bufrw, err := hj.Hijack()
 	if err != nil {
 		errorMsg := "Internal error!"
 		http.Error(w, errorMsg, http.StatusInternalServerError)
-		go_lib.LogErrorf(errorMsg+" Hijacking Error: %s\n", err)
+		base.Logger().Errorf(errorMsg+" Hijacking Error: %s\n", err)
 		return
 	}
 	defer conn.Close()
 	r.ParseForm()
 	reqType := r.FormValue("type")
-	go_lib.LogInfoln(request.GetRequestInfo(r))
+	base.Logger().Infoln(request.GetRequestInfo(r))
 	attrMap := request.GenerateBasicAttrMap(w, r)
 	loginName := attrMap[request.LOGIN_NAME_KEY]
 	groupName := attrMap[request.GROUP_NAME_KEY]
@@ -37,18 +37,18 @@ func GetAuthCodeForAdmin(w http.ResponseWriter, r *http.Request) {
 	if groupName != rights.ADMIN_USER_GROUP_NAME {
 		errorMsg := "Authentication failed!"
 		http.Error(w, errorMsg, http.StatusForbidden)
-		go_lib.LogErrorf(errorMsg+" [auth code push handler] %s \n", parameterOutline)
+		base.Logger().Errorf(errorMsg+" [auth code push handler] %s \n", parameterOutline)
 		return
 	}
 	if reqType != "lp" {
 		currentAuthCode, err := request.GetCurrentAuthCode()
 		if err != nil {
-			go_lib.LogErrorf("GetCurrentAuthCodeError: %s\n", err)
+			base.Logger().Errorf("GetCurrentAuthCodeError: %s\n", err)
 		}
-		go_lib.LogInfof("Push current auth code '%s' %s \n", currentAuthCode, parameterOutline)
+		base.Logger().Infof("Push current auth code '%s' %s \n", currentAuthCode, parameterOutline)
 		done := pushResponse(bufrw, currentAuthCode)
 		if !done {
-			go_lib.LogErrorf("Pushing current auth code '%s' is failing! %s \n", currentAuthCode, parameterOutline)
+			base.Logger().Errorf("Pushing current auth code '%s' is failing! %s \n", currentAuthCode, parameterOutline)
 		}
 	} else {
 		nacChan := make(chan string)
@@ -59,13 +59,13 @@ func GetAuthCodeForAdmin(w http.ResponseWriter, r *http.Request) {
 		request.AddNewAuthCodeTrigger(triggerId, triggerFunc)
 		defer request.DelNewAuthCodeTrigger(triggerId)
 		newAuthCode := <-nacChan // wait for new auth code generating
-		go_lib.LogInfof("Push new auth code '%s' %s \n", newAuthCode, parameterOutline)
+		base.Logger().Infof("Push new auth code '%s' %s \n", newAuthCode, parameterOutline)
 		done := pushResponse(bufrw, newAuthCode)
 		if !done {
-			go_lib.LogErrorf("Pushing new auth code '%s' is failing! %s \n", newAuthCode, parameterOutline)
+			base.Logger().Errorf("Pushing new auth code '%s' is failing! %s \n", newAuthCode, parameterOutline)
 		}
 	}
-	defer go_lib.LogInfof("The auth code push handler will be close. %s \n", parameterOutline)
+	defer base.Logger().Infof("The auth code push handler will be close. %s \n", parameterOutline)
 }
 
 func GetUserListForAdmin(w http.ResponseWriter, r *http.Request) {
@@ -73,19 +73,19 @@ func GetUserListForAdmin(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		errorMsg := "The Web Server does not support Hijacking! "
 		http.Error(w, errorMsg, http.StatusInternalServerError)
-		go_lib.LogErrorf(errorMsg)
+		base.Logger().Errorf(errorMsg)
 		return
 	}
 	conn, bufrw, err := hj.Hijack()
 	if err != nil {
 		errorMsg := "Internal error!"
 		http.Error(w, errorMsg, http.StatusInternalServerError)
-		go_lib.LogErrorf(errorMsg+" Hijacking Error: %s\n", err)
+		base.Logger().Errorf(errorMsg+" Hijacking Error: %s\n", err)
 		return
 	}
 	defer conn.Close()
 	r.ParseForm()
-	go_lib.LogInfoln(request.GetRequestInfo(r))
+	base.Logger().Infoln(request.GetRequestInfo(r))
 	attrMap := request.GenerateBasicAttrMap(w, r)
 	loginName := attrMap[request.LOGIN_NAME_KEY]
 	groupName := attrMap[request.GROUP_NAME_KEY]
@@ -93,17 +93,17 @@ func GetUserListForAdmin(w http.ResponseWriter, r *http.Request) {
 	if groupName != rights.ADMIN_USER_GROUP_NAME {
 		errorMsg := "Authentication failed!"
 		http.Error(w, errorMsg, http.StatusForbidden)
-		go_lib.LogErrorf(errorMsg+" [user list handler] %s \n", parameterOutline)
+		base.Logger().Errorf(errorMsg+" [user list handler] %s \n", parameterOutline)
 		return
 	}
 	var respBuffer bytes.Buffer
 	users, err := rights.FindUser("*")
 	if err != nil {
-		go_lib.LogErrorf("FindUserError: %s\n", err)
+		base.Logger().Errorf("FindUserError: %s\n", err)
 	} else {
 		b, err := json.Marshal(users)
 		if err != nil {
-			go_lib.LogErrorf("JsonMarshalError (source=%v): %s\n", users, err)
+			base.Logger().Errorf("JsonMarshalError (source=%v): %s\n", users, err)
 		} else {
 			respBuffer.WriteString(string(b))
 		}
@@ -111,6 +111,6 @@ func GetUserListForAdmin(w http.ResponseWriter, r *http.Request) {
 	resp := respBuffer.String()
 	done := pushResponse(bufrw, resp)
 	if !done {
-		go_lib.LogErrorf("Pushing user list '%s' is failing! %s \n", resp, parameterOutline)
+		base.Logger().Errorf("Pushing user list '%s' is failing! %s \n", resp, parameterOutline)
 	}
 }

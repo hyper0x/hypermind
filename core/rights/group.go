@@ -3,7 +3,6 @@ package rights
 import (
 	"encoding/json"
 	"errors"
-	"go_lib"
 	"hypermind/core/base"
 	"hypermind/core/dao"
 	"runtime/debug"
@@ -57,20 +56,20 @@ func init() {
 	for name, rights := range userGroupMap {
 		userGroup, err := GetUserGroup(name)
 		if err != nil {
-			go_lib.LogErrorf("Get User Group (name=%s) Error: %s\n", name, err)
+			base.Logger().Errorf("Get User Group (name=%s) Error: %s\n", name, err)
 			continue
 		}
 		if userGroup != nil {
 			err = DeleteUserGroup(name)
 			if err != nil {
-				go_lib.LogErrorf("Delete User Group (name=%s) Error: %s\n", name, err)
+				base.Logger().Errorf("Delete User Group (name=%s) Error: %s\n", name, err)
 				continue
 			}
 		}
 		userGroup = &UserGroup{Name: name, Rights: rights}
 		err = AddUserGroup(userGroup)
 		if err != nil {
-			go_lib.LogErrorf("Add User Group '%v' Error: %s\n", userGroup, err)
+			base.Logger().Errorf("Add User Group '%v' Error: %s\n", userGroup, err)
 			continue
 		}
 	}
