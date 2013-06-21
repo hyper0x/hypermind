@@ -30,6 +30,7 @@ $(document).ready(function() {
             userTbody.append(addRowTemplete);
         });
         var innerBoard = $("#inner_board")
+        innerBoard.append("<br>")
         for (i = 0; i < data.length; i++) {
             innerBoard.append("<br>")
             if (i % 2 == 0) {
