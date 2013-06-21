@@ -32,6 +32,9 @@ $(document).ready(function() {
         var innerBoard = $("#inner_board")
         for (i = 0; i < data.length; i++) {
             innerBoard.append("<br>")
+            if (i % 2 == 0) {
+                innerBoard.append("<br>")
+            }
         }  
     }, dataType: "json", timeout: 2000 });
  });
