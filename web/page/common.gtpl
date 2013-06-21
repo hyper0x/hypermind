@@ -1,11 +1,15 @@
 {{define "header-import"}}
-<link href="../css/bootstrap.css" rel="stylesheet">
+<link href="../css/bootstrap.min.css" rel="stylesheet">
 <style>
     body {
     padding-top: 60px;
     }
+    p.class {
+    text-left;
+    }
 </style>
-<link href="../css/bootstrap-responsive.css" rel="stylesheet">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="../css/bootswatch.css" rel="stylesheet">
 
 <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 <!--[if lt IE 9]>
@@ -21,6 +25,7 @@
 
 {{define "js-import"}}
 <script src="../js/jquery.min.js"></script>
-<script src="../js/bootstrap.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script src="../js/bootswatch.js"></script>
 <script src="../js/hypermind.js"></script>
 {{end}}
