@@ -26,9 +26,9 @@ type MySession struct {
 
 func (self *MySession) Initialize(
 	grantors string,
-	// survivalSeconds: 
-	//  '<0'- Don't set/Delete cookie; 
-	//  '0' - Set temporary cookie; 
+	// survivalSeconds:
+	//  '<0'- Don't set/Delete cookie;
+	//  '0' - Set temporary cookie;
 	//  '>0'- Set long term cookie according to this value & Set session expires
 	survivalSeconds int,
 	w http.ResponseWriter,
